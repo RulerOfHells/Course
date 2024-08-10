@@ -1,0 +1,24 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title> Rohan's page </title>
+</head>
+
+<body bgcolor="black">
+	
+	<h1 style="color:blue; text-align:center"> Hello <span style="color:pink" th:text="${name}+'!'" /> </h1>
+	
+	<form action="/" style="text-align:center">
+		<label style="color:white"> Enter your name </label>
+		<input type="text" name="name" />
+		<input type="submit" value="uwu"/>
+	</form>
+		
+	<br><br>
+	
+	<p style="color:white; text-align:center"> This is for playing around, if you want to use api
+		<a href="/api/courses"> click here </a> </p>
+		
+</body>
+</html>

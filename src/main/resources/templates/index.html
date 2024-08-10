@@ -1,0 +1,41 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+	
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title> Rohan's page </title>
+
+		<style>
+			a:link, a:visited {
+				text-align: center;
+				padding: 15px 25px;
+				color: pink;
+				background-color: brown;
+				display: inline-block;
+				text-decoration: none;
+			}
+			
+			a:hover, a:active {
+				background-color: blue;
+			}
+			
+			.manage-container {
+				display: flex;
+				gap: 40px;
+				justify-content: center;
+				align-items: center;
+			}
+		</style>
+	</head>
+
+	<body bgcolor="black">
+		
+		<h1 style="color:blue; text-align:center"> University Register </h1> <br>
+		
+		<div class="manage-container">
+			<a href="students"> Manage Students </a> <br>
+		
+			<a href="courses"> Manage Courses </a>
+		</div>
+	</body>
+</html>
