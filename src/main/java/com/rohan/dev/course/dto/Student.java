@@ -14,9 +14,9 @@ public class Student {
 	private int rollNo;
 	
 
-	private Integer[] courses;
+	private Course[] courses;
 	
-	public Student(int rollNo, String studentName, int age, Integer[] courses) {
+	public Student(int rollNo, String studentName, int age, Course[] courses) {
 		this.studentName = studentName;
 		this.age = age;
 		this.courses = courses;
@@ -49,11 +49,11 @@ public class Student {
 		this.age = age;
 	}
 	
-	public Integer[] getCourses() {
+	public Course[] getCourses() {
 		return courses;
 	}
 	
-	public void setCourses(Integer[] courses) {
+	public void setCourses(Course[] courses) {
 		this.courses = courses;
 	}
 	

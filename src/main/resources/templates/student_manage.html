@@ -134,7 +134,7 @@
 				</td>
 				<td class="tdmain">
 					<ul>
-						<li th:each="course : ${student.courses}" th:text="${courseMap.get(course)}" />
+						<li th:each="course : ${student.courses}" th:text="${course.getCourseName()}" />
 					</ul>
 				</td>
 				<td class="editX">
@@ -190,7 +190,7 @@
 						<td><label for="studentCourses"> Select Courses </label></td>
 						<td>
 							<select multiple="multiple" id="studentCourses" name="courses" style="width: 50%; color: black">
-								<option th:each="course : ${courseMap.values()}" th:value="${course}" th:text="${course}" />
+								<option th:each="course : ${courses}" th:value="${course.getCourseName()}" th:text="${course.getCourseName()}" />
 							</select>
 						</td>
 					</tr>
