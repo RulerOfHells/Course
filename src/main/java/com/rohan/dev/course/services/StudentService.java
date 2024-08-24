@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rohan.dev.course.dao.StudentDAO;
+import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.dto.Student;
 
 @Service
@@ -16,9 +17,12 @@ public class StudentService {
 	private StudentDAO studentDAO;
 	private List<Student> students;
 	
+	private CourseService courseService;
+	
 	@Autowired
-	public StudentService(StudentDAO studentDAO) {
+	public StudentService(StudentDAO studentDAO, CourseService courseService) {
 		this.studentDAO = studentDAO;
+		this.courseService = courseService;
 		init();
 	}
 	
@@ -28,8 +32,14 @@ public class StudentService {
 		if(students == null)
 			students = new LinkedList<>();
 		else
-			for(var student : students)
-				student.setCourses(studentDAO.getStudentCourses(student.getRollNo()).toArray(new Integer[0]));
+			for(var student : students) {
+				List<Course> newCourses = new LinkedList<>();
+				Integer[] courseIDs = studentDAO.getStudentCourses(student.getRollNo()).toArray(new Integer[0]);
+				for(var cid : courseIDs)
+					newCourses.add(courseService.getCourse(cid));			
+				student.setCourses(newCourses.toArray(new Course[0]));
+			}
+				
 	}
 	
 	private Student getStudentById(int id) throws NoSuchElementException {

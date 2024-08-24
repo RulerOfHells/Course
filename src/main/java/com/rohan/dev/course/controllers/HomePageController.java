@@ -1,7 +1,5 @@
 package com.rohan.dev.course.controllers;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,21 +14,14 @@ import com.rohan.dev.course.services.StudentService;
 @Controller
 public class HomePageController {
 	
-	private Map<Integer, String> courseMap;
-	
 	private CourseService courseService;
 	
 	private StudentService studentService;
 	
 	@Autowired
-	public HomePageController(CourseService courseService, StudentService studentService, Map<Integer, String> courseMap) {
+	public HomePageController(CourseService courseService, StudentService studentService) {
 		this.courseService = courseService;
 		this.studentService = studentService;
-		this.courseMap = courseMap;
-		
-		for(var course : courseService.getAllCourses()) {
-			courseMap.put(course.getCourseID(), course.getCourseName());
-		}
 	}
 	
 	@GetMapping("/")
@@ -51,7 +42,7 @@ public class HomePageController {
 	@RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST})
 	public ModelAndView manageStudent(ModelAndView mv) {
 		
-		mv.addObject("courseMap", courseMap);
+		mv.addObject("courses", courseService.getAllCourses());
 		mv.addObject("students", studentService.getAllStudents());
 		mv.setViewName("student_manage");
 		return mv;
