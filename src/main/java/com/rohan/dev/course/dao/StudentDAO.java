@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.dto.Student;
 
 @Repository
@@ -40,7 +41,7 @@ public class StudentDAO {
 		sql = "insert into students_courses values(?, ?)";
 		
 		for(var cid : student.getCourses())
-			jdbcTemplate.update(sql, student.getRollNo(), cid);
+			jdbcTemplate.update(sql, student.getRollNo(), cid.getCourseID());
 	}
 	
 	public void batchAdd(List<Student> students) {
@@ -79,8 +80,8 @@ public class StudentDAO {
 		sql = "insert into students_courses values(?, ?)";
 		
 		if(student.getCourses() != null)
-			for(int cid : student.getCourses())
-				jdbcTemplate.update(sql, student.getRollNo(), cid);
+			for(Course course : student.getCourses())
+				jdbcTemplate.update(sql, student.getRollNo(), course.getCourseID());
 		
 	}
 	
