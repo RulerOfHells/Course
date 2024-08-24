@@ -5,11 +5,15 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.dto.Student;
+import com.rohan.dev.course.editors.StudentCoursesEditor;
 import com.rohan.dev.course.services.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +24,12 @@ public class StudentController {
 	
 	@Autowired
 	StudentService studentService;
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(Course.class,"courses", new StudentCoursesEditor());
+	}
+	
 	
 	@PostMapping("/students/add")
 	public String createStudent(@Valid Student student, BindingResult result, HttpServletResponse res) throws IOException {
