@@ -68,6 +68,10 @@
 				border: none;
 			}
 			
+			li {
+				margin-bottom: 5px;
+			}
+			
 		</style>
 		
 		<script>
@@ -82,12 +86,23 @@
 				let froll = document.getElementById('roll'+id);
 				let fage = document.getElementById('age'+id);
 				let button = document.getElementById('b'+id);
+				let ful = document.getElementById('courses'+id);
+				let div = document.getElementById('div'+id);
+				
 				
 				fname.disabled = false;
 				froll.disabled = false;
 				fage.disabled = false;
 				
+				ful.style.display = 'none';
 				button.style.display = 'flex';
+				div.style.display = 'flex';
+				
+				for(const child of div.children) {
+					for(const ch of ful.children)
+						if(child.getAttribute('value').includes(ch.getAttribute('value')))
+							child.setAttribute('checked', 'true')
+				}
 			}
 
 			function submitForm(event, id) {
@@ -95,11 +110,14 @@
 				let froll = document.getElementById('roll'+id);
 				let fname = document.getElementById('name'+id);
 				let fage = document.getElementById('age'+id);
+				let div = document.getElementById('div'+id);
 				
 				form.appendChild(froll);
 				form.appendChild(fname);
 				form.appendChild(fage);
-				
+				for(const child of div.children)
+					form.appendChild(child);
+								
 				form.submit();
 				
 				event.target.style.display = "none";
@@ -133,9 +151,13 @@
 					<input type="text" th:id="'age'+${student.rollNo}" name="age" th:value="${student.age}" disabled/>
 				</td>
 				<td class="tdmain">
-					<ul>
-						<li th:each="course : ${student.courses}" th:text="${course.getCourseName()}" />
+					<ul th:id="'courses'+${student.rollNo}" style="text-align: left">
+						<li th:each="course : ${student.courses}" th:value="${course.getCourseID()}" th:text="${course.getCourseName()}" />
 					</ul>
+					<div th:id="'div'+${student.rollNo}" style="display:none;">
+						<input type="checkbox" th:each="course : ${courses}" name="courses" th:value="${course.getCourseID()} + '+' + ${course.getCourseName()}"
+							th:text="${course.getCourseName()}" />
+					</div>
 				</td>
 				<td class="editX">
 					<a th:href="@{'/students/remove/'+${student.rollNo}}">
