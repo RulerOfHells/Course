@@ -1,5 +1,7 @@
 package com.rohan.dev.course.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
@@ -14,9 +16,9 @@ public class Student {
 	private int rollNo;
 	
 
-	private Course[] courses;
+	private List<Course> courses;
 	
-	public Student(int rollNo, String studentName, int age, Course[] courses) {
+	public Student(int rollNo, String studentName, int age, List<Course> courses) {
 		this.studentName = studentName;
 		this.age = age;
 		this.courses = courses;
@@ -49,11 +51,11 @@ public class Student {
 		this.age = age;
 	}
 	
-	public Course[] getCourses() {
+	public List<Course> getCourses() {
 		return courses;
 	}
 	
-	public void setCourses(Course[] courses) {
+	public void setCourses(List<Course> courses) {
 		this.courses = courses;
 	}
 	

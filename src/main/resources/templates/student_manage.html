@@ -105,25 +105,6 @@
 				}
 			}
 
-			function submitForm(event, id) {
-				let form = document.getElementById('f'+id);
-				let froll = document.getElementById('roll'+id);
-				let fname = document.getElementById('name'+id);
-				let fage = document.getElementById('age'+id);
-				let div = document.getElementById('div'+id);
-				
-				form.appendChild(froll);
-				form.appendChild(fname);
-				form.appendChild(fage);
-				for(const child of div.children)
-					form.appendChild(child);
-								
-				form.submit();
-				
-				event.target.style.display = "none";
-			}
-
-			console.log('student executed');
 		</script>
 		
 	</head>
@@ -141,6 +122,9 @@
 			</tr>
 			
 			<tr th:each="student : ${students}" style = "color: white">
+
+			<form th:action="@{'/students/update/'+${student.rollNo}}" method="post" style="display:flex">
+				
 				<td class="tdmain">
 					<input type="text" th:id="'roll'+${student.rollNo}" name="rollNo" th:value="${student.rollNo}" disabled/>
 				</td>
@@ -155,7 +139,7 @@
 						<li th:each="course : ${student.courses}" th:value="${course.getCourseID()}" th:text="${course.getCourseName()}" />
 					</ul>
 					<div th:id="'div'+${student.rollNo}" style="display:none;">
-						<input type="checkbox" th:each="course : ${courses}" name="courses" th:value="${course.getCourseID()} + '+' + ${course.getCourseName()}"
+						<input type="checkbox" th:each="course : ${courses}" name="courses[]" th:value="${course.getCourseID()}+'+'+${course.getCourseName()}"
 							th:text="${course.getCourseName()}" />
 					</div>
 				</td>
@@ -175,12 +159,9 @@
 						</svg>
 					</a>
 					
-					<a th:attr="onclick=|submitForm(event, '${student.rollNo}')|" th:id="'b'+${student.rollNo}" style="display:none">
-						clicklol
-					</a>
-					
-					<form th:id="'f'+${student.rollNo}" th:action="@{'/students/update/'+${student.rollNo}}" method="post" style="display:none"></form>
+					<input type="submit" th:id="'b'+${student.rollNo}" style="display: none"/>
 				</td>
+				</form>
 			</tr>
 			<tr>
 				<td class="tdmain" colspan="4">
