@@ -37,7 +37,7 @@ public class StudentService {
 				Integer[] courseIDs = studentDAO.getStudentCourses(student.getRollNo()).toArray(new Integer[0]);
 				for(var cid : courseIDs)
 					newCourses.add(courseService.getCourse(cid));			
-				student.setCourses(newCourses.toArray(new Course[0]));
+				student.setCourses(newCourses);
 			}
 				
 	}
