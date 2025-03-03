@@ -50,17 +50,6 @@ public class StudentController {
 		return "redirect:/students";
 	}
 	
-	@GetMapping("/students/get/{id}")
-	public Student getStudent(@PathVariable int id, HttpServletResponse res) throws IOException {
-		try {
-			return studentService.getStudent(id);
-		}
-		catch(IllegalArgumentException e) {
-			res.sendError(404, "Student with roll no " + id +" not found!");
-		}
-		return null;
-	}
-	
 	@PostMapping("/students/update/{id}")
 	public String updateStudent(@Valid Student student, BindingResult result, @PathVariable int id, HttpServletResponse res) throws IOException {
 		
