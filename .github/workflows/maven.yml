@@ -27,6 +27,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: Create env.properties file
+      run: echo "email.username=${{ secrets.EMAIL_USERNAME }}" > env.properties
+           echo "email.password=${{ secrets.EMAIL_PASSWORD }}" >> env.properties
+           echo "database.user=${{ secrets.DATABASE_USER }}" >> env.properties
+           echo "database.pass=${{ secrets.DATABASE_PASS }}" >> env.properties
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
