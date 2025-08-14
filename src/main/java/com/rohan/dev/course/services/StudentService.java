@@ -15,7 +15,6 @@ import com.rohan.dev.course.dto.Student;
 public class StudentService {
 	
 	private StudentDAO studentDAO;
-	private List<Student> students;
 	
 	private CourseService courseService;
 	
@@ -23,27 +22,18 @@ public class StudentService {
 	public StudentService(StudentDAO studentDAO, CourseService courseService) {
 		this.studentDAO = studentDAO;
 		this.courseService = courseService;
-		init();
-	}
-	
-	private void init() {
-		students = studentDAO.getAllStudents();
-		
-		if(students == null)
-			students = new LinkedList<>();
-		else
-			for(var student : students) {
-				List<Course> newCourses = new LinkedList<>();
-				Integer[] courseIDs = studentDAO.getStudentCourses(student.getRollNo()).toArray(new Integer[0]);
-				for(var cid : courseIDs)
-					newCourses.add(courseService.getCourse(cid));			
-				student.setCourses(newCourses);
-			}
-				
 	}
 	
 	private Student getStudentById(int id) throws NoSuchElementException {
-		return students.stream().filter(s -> s.getRollNo() == id).findFirst().get();
+		Student s = studentDAO.getStudent(id);
+		if(s == null)
+			throw new NoSuchElementException();
+		List<Course> newCourses = new LinkedList<>();
+		Integer[] courseIDs = studentDAO.getStudentCourses(s.getRollNo()).toArray(new Integer[0]);
+		for(var cid : courseIDs)
+			newCourses.add(courseService.getCourse(cid));			
+		s.setCourses(newCourses);
+		return s;
 	}
 	
 	private boolean exists(int id) {
@@ -57,8 +47,12 @@ public class StudentService {
 	}
 	
 	public List<Student> getAllStudents() throws IllegalStateException {
-		if(students.isEmpty())
+		List<Student> s = studentDAO.getAllStudents();
+		if(s == null)
 			throw new IllegalStateException();
+		List<Student> students = new LinkedList<>();
+		for(Student student : s)
+			students.add(getStudentById(student.getRollNo()));
 		return students;
 	}	
 	
@@ -71,7 +65,6 @@ public class StudentService {
 	public void addStudent(Student student) throws IllegalArgumentException {
 		if(exists(student.getRollNo()))
 			throw new IllegalArgumentException();
-		students.add(student);
 		studentDAO.addStudent(student);
 	}
 	
@@ -96,7 +89,6 @@ public class StudentService {
 		if(!exists(id))
 			throw new IllegalArgumentException();
 		Student student = getStudentById(id);
-		students.remove(student);
 		studentDAO.deleteStudent(id);
 		return student;
 	}

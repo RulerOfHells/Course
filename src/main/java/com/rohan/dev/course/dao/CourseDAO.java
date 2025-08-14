@@ -49,6 +49,15 @@ public class CourseDAO {
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 	
+	public Course getCourse(int id) {
+		sql = "select ID as courseID, courseName from courses where ID = ?";
+		List<Course> course = jdbcTemplate.query(sql, rowMapper, id);
+		if(course.size() == 0)
+			return null;
+		return course.get(0);
+		
+	}
+	
 	public void updateCourse(int id, Course course) {
 		sql = "update courses set id=?, courseName=? where id=?";
 		jdbcTemplate.update(sql, course.getCourseID(), course.getCourseName(), id);

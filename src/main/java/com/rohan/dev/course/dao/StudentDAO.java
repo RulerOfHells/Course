@@ -65,6 +65,14 @@ public class StudentDAO {
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 	
+	public Student getStudent(int rollNo) {
+		sql = "select Roll_No as rollNo, studentName, age from students where Roll_No=?";
+		List<Student> students = jdbcTemplate.query(sql, rowMapper, rollNo);
+		if(students.size() == 0)
+			return null;
+		return students.get(0);
+	}
+	
 	public List<Integer> getStudentCourses(int rollNo) {
 		sql = "select ID from students_courses where Roll_No=?";
 		
