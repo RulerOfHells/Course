@@ -1,6 +1,5 @@
 package com.rohan.dev.course.services;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -14,23 +13,17 @@ import com.rohan.dev.course.dto.Course;
 public class CourseService {
 	
 	private CourseDAO courseDAO;
-	private List<Course> courses;
 	
 	@Autowired
 	public CourseService(CourseDAO courseDAO) {
 		this.courseDAO = courseDAO;
-		init();
-	}
-	
-	private void init() {
-		courses = courseDAO.getAllCourses();
-		
-		if(courses == null)
-			courses = new LinkedList<>();
 	}
 	
 	private Course getCourseByID(int id) throws NoSuchElementException {
-		return courses.stream().filter(c -> c.getCourseID() == id).findFirst().get();
+		Course c = courseDAO.getCourse(id);
+		if(c == null)
+			throw new NoSuchElementException();
+		return c;
 	}
 	
 	private boolean exists(int id) {
@@ -44,6 +37,7 @@ public class CourseService {
 	}
 	
 	public List<Course> getAllCourses() throws IllegalStateException {
+		List<Course> courses = courseDAO.getAllCourses();
 		if(courses.isEmpty())
 			throw new IllegalStateException();
 		return courses;
@@ -58,7 +52,6 @@ public class CourseService {
 	public void addCourse(Course course) throws IllegalArgumentException {
 		if(exists(course.getCourseID()))
 			throw new IllegalArgumentException();
-		courses.add(course);
 		courseDAO.addCourse(course);
 	}
 	
@@ -80,7 +73,6 @@ public class CourseService {
 	public Course removeCourse(int id) throws IllegalStateException {
 		if (exists(id)) {
 			Course course = getCourseByID(id);
-			courses.remove(course);
 			courseDAO.deleteCourse(id);
 			return course;
 		}
