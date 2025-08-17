@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.dto.Student;
 import com.rohan.dev.course.editors.StudentCoursesEditor;
+import com.rohan.dev.course.services.RegistrationService;
 import com.rohan.dev.course.services.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +25,9 @@ public class StudentController {
 	
 	@Autowired
 	StudentService studentService;
+	
+	@Autowired
+	RegistrationService registrationService;
 	
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {

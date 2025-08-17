@@ -78,5 +78,4 @@ public class CourseService {
 		}
 		throw new IllegalStateException();
 	}
-	
 }

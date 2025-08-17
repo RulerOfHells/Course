@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.rohan.dev.course.services.CourseService;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.services.RegistrationService;
 
 @Controller
 public class HomePageController {
 	
 	private CourseService courseService;
 	
-	private StudentService studentService;
+	private RegistrationService registrationService;
 	
 	@Autowired
-	public HomePageController(CourseService courseService, StudentService studentService) {
+	public HomePageController(CourseService courseService, RegistrationService registrationService) {
 		this.courseService = courseService;
-		this.studentService = studentService;
+		this.registrationService = registrationService;
 	}
 	
 	@GetMapping("/")
@@ -43,7 +43,7 @@ public class HomePageController {
 	public ModelAndView manageStudent(ModelAndView mv) {
 		
 		mv.addObject("courses", courseService.getAllCourses());
-		mv.addObject("students", studentService.getAllStudents());
+		mv.addObject("students", registrationService.getAllEnrolledStudents());
 		mv.setViewName("student_manage");
 		return mv;
 	}
