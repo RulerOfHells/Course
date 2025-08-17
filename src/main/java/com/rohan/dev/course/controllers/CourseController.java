@@ -64,6 +64,8 @@ public class CourseController {
 		}
 		
 		try {
+			if(id != course.getCourseID())
+				registrationService.unassignCourse(id);
 			courseService.updateCourse(id, course);
 		}
 		catch(IllegalArgumentException e) {

@@ -79,6 +79,8 @@ public class APICourseController {
 		}
 		
 		try {
+			if(id != course.getCourseID())
+				registrationService.unassignCourse(id);
 			courseService.updateCourse(id, course);
 		}
 		catch(IllegalArgumentException e) {
