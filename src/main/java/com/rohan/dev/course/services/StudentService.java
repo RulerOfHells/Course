@@ -2,13 +2,11 @@ package com.rohan.dev.course.services;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rohan.dev.course.dao.StudentDAO;
-import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.dto.Student;
 
 @Service
@@ -16,23 +14,15 @@ public class StudentService {
 	
 	private StudentDAO studentDAO;
 	
-	private CourseService courseService;
-	
 	@Autowired
-	public StudentService(StudentDAO studentDAO, CourseService courseService) {
+	public StudentService(StudentDAO studentDAO) {
 		this.studentDAO = studentDAO;
-		this.courseService = courseService;
 	}
 	
-	private Student getStudentById(int id) throws NoSuchElementException {
+	public Student getStudentById(int id) throws IllegalArgumentException {
 		Student s = studentDAO.getStudent(id);
 		if(s == null)
-			throw new NoSuchElementException();
-		List<Course> newCourses = new LinkedList<>();
-		Integer[] courseIDs = studentDAO.getStudentCourses(s.getRollNo()).toArray(new Integer[0]);
-		for(var cid : courseIDs)
-			newCourses.add(courseService.getCourse(cid));			
-		s.setCourses(newCourses);
+			throw new IllegalArgumentException();
 		return s;
 	}
 	
@@ -40,7 +30,7 @@ public class StudentService {
 		try {
 			getStudentById(id);
 		}
-		catch(NoSuchElementException e) {
+		catch(IllegalArgumentException e) {
 			return false;
 		}
 		return true;
@@ -56,10 +46,9 @@ public class StudentService {
 		return students;
 	}	
 	
-	public Student getStudent(int id) throws IllegalArgumentException {
-		if(!exists(id))
-			throw new IllegalArgumentException();
-		return getStudentById(id);
+	
+	public List<Integer> getStudentCourses(int roll) {
+		return studentDAO.getStudentCourses(roll);
 	}
 	
 	public void addStudent(Student student) throws IllegalArgumentException {
@@ -69,20 +58,15 @@ public class StudentService {
 	}
 	
 	public void updateStudent(int id, Student newStudent) throws IllegalArgumentException, IllegalStateException {
-		try {
-			if(exists(newStudent.getRollNo()) && id != newStudent.getRollNo())
-				throw new IllegalStateException();
-			Student student = getStudentById(id);
-			student.setAge(newStudent.getAge());
-			student.setStudentName(newStudent.getStudentName());
-			student.setRollNo(newStudent.getRollNo());
-			student.setCourses(newStudent.getCourses());
+		if(exists(newStudent.getRollNo()) && id != newStudent.getRollNo())
+			throw new IllegalStateException();
+		Student student = getStudentById(id);
+		student.setAge(newStudent.getAge());
+		student.setStudentName(newStudent.getStudentName());
+		student.setRollNo(newStudent.getRollNo());
+		student.setCourses(newStudent.getCourses());
 			
-			studentDAO.updateStudent(id, student);
-		}
-		catch(NoSuchElementException e) {
-			throw new IllegalArgumentException();
-		}
+		studentDAO.updateStudent(id, student);
 	}
 	
 	public Student removeStudent(int id) throws IllegalArgumentException {
@@ -92,4 +76,8 @@ public class StudentService {
 		studentDAO.deleteStudent(id);
 		return student;
 	}
+	
+	public void unassignCourseFromAllStudents(int courseId) {
+        studentDAO.unassignCourseFromAllStudents(courseId);
+    }
 }

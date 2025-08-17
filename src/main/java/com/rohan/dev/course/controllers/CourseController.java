@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.services.CourseService;
+import com.rohan.dev.course.services.RegistrationService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,6 +21,9 @@ public class CourseController {
 	
 	@Autowired
 	CourseService courseService;
+	
+	@Autowired
+	RegistrationService registrationService;
 	
 	@PostMapping("/courses/add")
 	public String createCourse(@Valid Course course, BindingResult result, HttpServletResponse res) throws IOException {
@@ -76,6 +80,7 @@ public class CourseController {
 	@GetMapping("/courses/remove/{id}")
 	public String deleteCourse(@PathVariable int id, HttpServletResponse res) throws IOException {
 		try {
+			registrationService.unassignCourse(id);
 			courseService.removeCourse(id);
 		}
 		catch (IllegalStateException e) {

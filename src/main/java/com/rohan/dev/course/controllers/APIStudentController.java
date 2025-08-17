@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rohan.dev.course.dto.Student;
+import com.rohan.dev.course.services.RegistrationService;
 import com.rohan.dev.course.services.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,9 @@ public class APIStudentController {
 
 	@Autowired
 	StudentService studentService;
+	
+	@Autowired
+	RegistrationService registrationService;
 	
 	@PostMapping("/students")
 	public Student createStudent(@Valid @RequestBody Student student, BindingResult result, HttpServletResponse res) throws IOException {
@@ -47,7 +51,7 @@ public class APIStudentController {
 	@GetMapping("/students")
 	public List<Student> getStudents(HttpServletResponse res) throws IOException {
 		try {
-			return studentService.getAllStudents();
+			return registrationService.getAllEnrolledStudents();
 		}
 		catch(IllegalStateException e) {
 			res.sendError(400, "No students available!");
@@ -58,7 +62,7 @@ public class APIStudentController {
 	@GetMapping("/students/{id}")
 	public Student getStudent(@PathVariable int id, HttpServletResponse res) throws IOException {
 		try {
-			return studentService.getStudent(id);
+			return registrationService.getEnrolledStudent(id);
 		}
 		catch(IllegalArgumentException e) {
 			res.sendError(404, "Student with Roll No: " + id +" not found!");

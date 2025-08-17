@@ -79,6 +79,11 @@ public class StudentDAO {
 		return jdbcTemplate.query(sql, (RowMapper<Integer>) (arg0, arg1) -> Integer.parseInt(arg0.getObject("ID").toString()), rollNo);
 	}
 	
+	public void unassignCourseFromAllStudents(int courseId) {
+	    String sql = "DELETE FROM students_courses WHERE ID = ?";
+	    jdbcTemplate.update(sql, courseId);
+	}
+	
 	public void updateStudent(int id, Student student) {
 		sql = "update students set Roll_No=?, StudentName=?, Age=? where Roll_No=?";
 		
