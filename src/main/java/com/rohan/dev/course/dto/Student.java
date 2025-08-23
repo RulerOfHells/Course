@@ -16,9 +16,9 @@ public class Student {
 	private int rollNo;
 	
 
-	private List<Course> courses;
+	private List<Integer> courses;
 	
-	public Student(int rollNo, String studentName, int age, List<Course> courses) {
+	public Student(int rollNo, String studentName, int age, List<Integer> courses) {
 		this.studentName = studentName;
 		this.age = age;
 		this.courses = courses;
@@ -51,11 +51,11 @@ public class Student {
 		this.age = age;
 	}
 	
-	public List<Course> getCourses() {
+	public List<Integer> getCourses() {
 		return courses;
 	}
 	
-	public void setCourses(List<Course> courses) {
+	public void setCourses(List<Integer> courses) {
 		this.courses = courses;
 	}
 	

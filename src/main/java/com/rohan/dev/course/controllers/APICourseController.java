@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.services.CourseService;
-import com.rohan.dev.course.services.RegistrationService;
+import com.rohan.dev.course.services.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -29,7 +29,7 @@ public class APICourseController {
 	CourseService courseService;
 	
 	@Autowired
-	RegistrationService registrationService;
+	StudentService studentService;
 	
 	@PostMapping("/courses")
 	public Course createCourse(@Valid @RequestBody Course course, BindingResult result, HttpServletResponse res) throws IOException {
@@ -80,7 +80,7 @@ public class APICourseController {
 		
 		try {
 			if(id != course.getCourseID())
-				registrationService.unassignCourse(id);
+				studentService.unassignCourseFromAllStudents(id);
 			courseService.updateCourse(id, course);
 		}
 		catch(IllegalArgumentException e) {
@@ -92,7 +92,7 @@ public class APICourseController {
 	@DeleteMapping("/courses/{id}")
 	public Course deleteCourse(@PathVariable int id, HttpServletResponse res) throws IOException {
 		try {
-			registrationService.unassignCourse(id);
+			studentService.unassignCourseFromAllStudents(id);
 			return courseService.removeCourse(id);
 		}
 		catch (IllegalStateException e) {

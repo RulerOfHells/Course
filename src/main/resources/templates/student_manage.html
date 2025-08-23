@@ -136,10 +136,12 @@
 				</td>
 				<td class="tdmain">
 					<ul th:id="'courses'+${student.rollNo}" style="text-align: left">
-						<li th:each="course : ${student.courses}" th:value="${course.getCourseID()}" th:text="${course.getCourseName()}" />
+						<p th:each="id : ${student.courses}">
+						<li th:each="course : ${courses.?[courseID == __${id}__]}" th:value="${course.getCourseID()}" th:text="${course.getCourseName()}" />
+						</p>
 					</ul>
 					<div th:id="'div'+${student.rollNo}" style="display:none;">
-						<input type="checkbox" th:each="course : ${courses}" name="courses[]" th:value="${course.getCourseID()}+'+'+${course.getCourseName()}"
+						<input type="checkbox" th:each="course : ${courses}" name="courses[]" th:value="${course.getCourseID()}"
 							th:text="${course.getCourseName()}" />
 					</div>
 				</td>
@@ -193,7 +195,7 @@
 						<td><label for="studentCourses"> Select Courses </label></td>
 						<td>
 							<select multiple="multiple" id="studentCourses" name="courses" style="width: 50%; color: black">
-								<option th:each="course : ${courses}" th:value="${course.getCourseID()}+'+'+${course.getCourseName()}" th:text="${course.getCourseName()}" />
+								<option th:each="course : ${courses}" th:value="${course.getCourseID()}" th:text="${course.getCourseName()}" />
 							</select>
 						</td>
 					</tr>

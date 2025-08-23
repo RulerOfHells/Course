@@ -1,6 +1,5 @@
 package com.rohan.dev.course.services;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ public class StudentService {
 		Student s = studentDAO.getStudent(id);
 		if(s == null)
 			throw new IllegalArgumentException();
+		s.setCourses(getStudentCourses(id));
 		return s;
 	}
 	
@@ -37,14 +37,13 @@ public class StudentService {
 	}
 	
 	public List<Student> getAllStudents() throws IllegalStateException {
-		List<Student> s = studentDAO.getAllStudents();
-		if(s == null)
+		List<Student> students = studentDAO.getAllStudents();
+		if(students == null)
 			throw new IllegalStateException();
-		List<Student> students = new LinkedList<>();
-		for(Student student : s)
-			students.add(getStudentById(student.getRollNo()));
+		for(Student student : students)
+			student.setCourses(getStudentCourses(student.getRollNo()));
 		return students;
-	}	
+	}
 	
 	
 	public List<Integer> getStudentCourses(int roll) {
