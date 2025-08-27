@@ -4,10 +4,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 public class Course {
-	@Min(value = 1, message = "Course ID should be atleast 1")
+	@Min(value = 1, message = "{course.valid.id}")
 	private int courseID;
 	
-	@Size(min = 4, message = "Course name must be 4 letters or higher")
+	@Size(min = 4, message = "{course.valid.name}")
 	private String courseName;
 	
 	public Course(int courseID, String courseName) {

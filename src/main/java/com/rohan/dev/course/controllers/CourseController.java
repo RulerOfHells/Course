@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.rohan.dev.course.dto.Course;
 import com.rohan.dev.course.services.CourseService;
@@ -26,11 +27,12 @@ public class CourseController {
 	StudentService studentService;
 	
 	@PostMapping("/courses/add")
-	public String createCourse(@Valid Course course, BindingResult result, HttpServletResponse res) throws IOException {
+	public String createCourse(@Valid Course course, BindingResult result, RedirectAttributes redirectAttribute, HttpServletResponse res) throws IOException {
 		
 		if(result.hasErrors()) {
-			res.sendError(400, result.getAllErrors().get(0).getDefaultMessage());
-			return null;
+			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);
+			redirectAttribute.addFlashAttribute("errCourse", course);
+			return "redirect:/courses";
 		}
 		
 		try {
@@ -56,11 +58,12 @@ public class CourseController {
 	}
 	
 	@PostMapping("/courses/update/{id}")
-	public String updateCourse(@Valid Course course, BindingResult result, @PathVariable int id, HttpServletResponse res) throws IOException {
+	public String updateCourse(@Valid Course course, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttribute, HttpServletResponse res) throws IOException {
 		
 		if(result.hasErrors()) {
-			res.sendError(400, result.getAllErrors().get(0).getDefaultMessage());
-			return null;
+			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);
+			redirectAttribute.addFlashAttribute("errCourse", course);
+			return "redirect:/courses";
 		}
 		
 		try {

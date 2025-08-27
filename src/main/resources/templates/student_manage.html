@@ -72,6 +72,11 @@
 				margin-bottom: 5px;
 			}
 			
+			.error {
+				text-align: center;
+				color: red;
+			}
+			
 		</style>
 		
 		<script>
@@ -112,6 +117,12 @@
 		
 		<h1 style="text-align: center; color: blue"> View/Manage Students </h1>
 		<br>
+		
+		<div class="error" th:if="${errStudent != null}" th:object="${errStudent}">
+			<p th:if="${#fields.hasErrors('studentName')}" th:errors="*{studentName}"/>
+			<p th:if="${#fields.hasErrors('age')}" th:errors="*{age}"/>
+			<p th:if="${#fields.hasErrors('rollNo')}" th:errors="*{rollNo}"/>
+		</div>
 		
 		<table class="main">
 			<tr style="background-color: purple; color:white">

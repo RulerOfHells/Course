@@ -6,13 +6,13 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 public class Student {
-	@Size(min = 3, message = "Student name must be 3 letters or higher")
+	@Size(min = 3, message = "{student.valid.name}")
 	private String studentName;
 	
-	@Min(value = 14, message = "Student age must be 14 years or higher")
+	@Min(value = 14, message = "{student.valid.age}")
 	private int age;
 	
-	@Min(value = 1, message = "Student ID nust be 1 or higher")
+	@Min(value = 1, message = "{student.valid.roll}")
 	private int rollNo;
 	
 
