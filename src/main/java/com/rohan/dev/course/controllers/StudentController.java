@@ -1,7 +1,5 @@
 package com.rohan.dev.course.controllers;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -36,7 +34,7 @@ public class StudentController {
 	
 	
 	@PostMapping("/students/add")
-	public String createStudent(@Valid Student student, BindingResult result, RedirectAttributes redirectAttributes) throws IOException, InvalidStudentException {
+	public String createStudent(@Valid Student student, BindingResult result, RedirectAttributes redirectAttributes) throws InvalidStudentException {
 		
 		if(result.hasErrors()) {
 			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.errStudent", result);
@@ -55,7 +53,7 @@ public class StudentController {
 	}
 	
 	@PostMapping("/students/update/{id}")
-	public String updateStudent(@Valid Student student, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttributes) throws IOException, StudentNotFoundException, InvalidStudentException {
+	public String updateStudent(@Valid Student student, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttributes) throws StudentNotFoundException, InvalidStudentException {
 		
 		if(result.hasErrors()) {
 			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.errStudent", result);
@@ -76,7 +74,7 @@ public class StudentController {
 	}
 	
 	@GetMapping("/students/remove/{id}")
-	public String deleteStudent(@PathVariable int id) throws IOException, StudentNotFoundException {
+	public String deleteStudent(@PathVariable int id) throws StudentNotFoundException {
 		try {
 			studentService.removeStudent(id);
 		}
@@ -95,7 +93,7 @@ public class StudentController {
 	
 	@ExceptionHandler(StudentNotFoundException.class)
 	public String handleInvalidCourse(StudentNotFoundException ex, HttpServletResponse res, RedirectAttributes redirectAttributes) {
-		res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		res.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		redirectAttributes.addFlashAttribute("exceptionMsg", ex.getMessage());
 		return "redirect:/students";
 	}

@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rohan.dev.course.dto.Course;
+import com.rohan.dev.course.exceptions.CourseNotFoundException;
+import com.rohan.dev.course.exceptions.InvalidCourseException;
 import com.rohan.dev.course.services.CourseService;
 import com.rohan.dev.course.services.StudentService;
 
@@ -32,51 +35,38 @@ public class APICourseController {
 	StudentService studentService;
 	
 	@PostMapping("/courses")
-	public Course createCourse(@Valid @RequestBody Course course, BindingResult result, HttpServletResponse res) throws IOException {
-		
-		if(result.hasErrors()) {
-			res.sendError(400, result.getAllErrors().get(0).getDefaultMessage());
-			return null;
-		}
-		
+	public Course createCourse(@Valid @RequestBody Course course) throws IOException, InvalidCourseException {
 		try {
 			courseService.addCourse(course);
 		}
 		catch(IllegalArgumentException e) {
-			res.sendError(400, "Invalid course");
+			throw new InvalidCourseException("Invalid course! Course with ID: " + course.getCourseID() + " already exists!");
 		}
 		return course;
 	}
 	
 	@GetMapping("/courses")
-	public List<Course> getCourses(HttpServletResponse res) throws IOException {
+	public List<Course> getCourses() throws IOException, CourseNotFoundException {
 		try {
 			return courseService.getAllCourses();
 		}
 		catch(IllegalStateException e) {
-			res.sendError(400, "No courses available!");
+			throw new CourseNotFoundException("No courses available!");
 		}
-		return null;
 	}
 	
 	@GetMapping("/courses/{id}")
-	public Course getCourse(@PathVariable int id, HttpServletResponse res) throws IOException {
+	public Course getCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
 		try {
 			return courseService.getCourse(id);
 		}
 		catch(IllegalArgumentException e) {
-			res.sendError(404, "Course with id " + id +" not found!");
+			throw new CourseNotFoundException("Course with id " + id +" not found!");
 		}
-		return null;
 	}
 	
 	@PutMapping("/courses/{id}")
-	public Course updateCourse(@Valid @RequestBody Course course, BindingResult result, @PathVariable int id, HttpServletResponse res) throws IOException {
-		
-		if(result.hasErrors()) {
-			res.sendError(400, result.getAllErrors().get(0).getDefaultMessage());
-			return null;
-		}
+	public Course updateCourse(@Valid @RequestBody Course course, @PathVariable int id) throws IOException, CourseNotFoundException, InvalidCourseException {
 		
 		try {
 			if(id != course.getCourseID())
@@ -84,20 +74,37 @@ public class APICourseController {
 			courseService.updateCourse(id, course);
 		}
 		catch(IllegalArgumentException e) {
-			res.sendError(404, "Course with ID: " + id + " doesn't exist!");
+			throw new CourseNotFoundException("Course with ID: " + id + " doesn't exist!");
+		}
+		catch(IllegalStateException e) {
+			throw new InvalidCourseException("Invalid course! Course with ID: " + course.getCourseID() + " already exists");
 		}
 		return course;
 	}
 	
 	@DeleteMapping("/courses/{id}")
-	public Course deleteCourse(@PathVariable int id, HttpServletResponse res) throws IOException {
+	public Course deleteCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
 		try {
 			studentService.unassignCourseFromAllStudents(id);
 			return courseService.removeCourse(id);
 		}
 		catch (IllegalStateException e) {
-			res.sendError(404, "Course with ID: " + id + " doesn't exists!");
+			throw new CourseNotFoundException("Course with ID: " + id + " doesn't exists!");
 		}
-		return null;
+	}
+	
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public void handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletResponse res) throws IOException {
+    	res.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+    }
+	
+	@ExceptionHandler(InvalidCourseException.class)
+	public void handleInvalidCourse(InvalidCourseException ex, HttpServletResponse res) throws IOException {
+		res.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+	}
+	
+	@ExceptionHandler(CourseNotFoundException.class)
+	public void handleInvalidCourse(CourseNotFoundException ex, HttpServletResponse res) throws IOException {
+		res.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
 	}
 }

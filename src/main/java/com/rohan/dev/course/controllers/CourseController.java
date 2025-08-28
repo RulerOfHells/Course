@@ -1,7 +1,5 @@
 package com.rohan.dev.course.controllers;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -30,7 +28,7 @@ public class CourseController {
 	StudentService studentService;
 	
 	@PostMapping("/courses/add")
-	public String createCourse(@Valid Course course, BindingResult result, RedirectAttributes redirectAttribute) throws IOException, InvalidCourseException {
+	public String createCourse(@Valid Course course, BindingResult result, RedirectAttributes redirectAttribute) throws InvalidCourseException {
 		
 		if(result.hasErrors()) {
 			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);
@@ -49,7 +47,7 @@ public class CourseController {
 	}
 	
 	@GetMapping("/courses/get/{id}")
-	public Course getCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
+	public Course getCourse(@PathVariable int id) throws CourseNotFoundException {
 		try {
 			return courseService.getCourse(id);
 		}
@@ -59,7 +57,7 @@ public class CourseController {
 	}
 	
 	@PostMapping("/courses/update/{id}")
-	public String updateCourse(@Valid Course course, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttribute) throws IOException, InvalidCourseException, CourseNotFoundException {
+	public String updateCourse(@Valid Course course, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttribute) throws InvalidCourseException, CourseNotFoundException {
 		
 		if(result.hasErrors()) {
 			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);
@@ -82,7 +80,7 @@ public class CourseController {
 	}
 	
 	@GetMapping("/courses/remove/{id}")
-	public String deleteCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
+	public String deleteCourse(@PathVariable int id) throws CourseNotFoundException {
 		try {
 			studentService.unassignCourseFromAllStudents(id);
 			courseService.removeCourse(id);
@@ -102,7 +100,7 @@ public class CourseController {
 	
 	@ExceptionHandler(CourseNotFoundException.class)
 	public String handleInvalidCourse(CourseNotFoundException ex, HttpServletResponse res, RedirectAttributes redirectAttributes) {
-		res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		res.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		redirectAttributes.addFlashAttribute("exceptionMsg", ex.getMessage());
 		return "redirect:/courses";
 	}
