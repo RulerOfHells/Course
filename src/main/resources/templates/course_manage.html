@@ -111,6 +111,12 @@
 	</head>
 	
 	<body style = "background-color: black;">
+	
+		<script th:if="${exceptionMsg}">
+			let message = "[[${exceptionMsg}]]";
+			alert(message);
+		</script>
+	
 		<h1 style="text-align: center; color: blue"> View/Manage Courses </h1>
 		<br>
 		

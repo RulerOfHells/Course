@@ -115,6 +115,11 @@
 	</head>
 	<body style="background-color: BLACK">
 		
+		<script th:if="${exceptionMsg}">
+			let message = "[[${exceptionMsg}]]";
+			alert(message);
+		</script>
+		
 		<h1 style="text-align: center; color: blue"> View/Manage Students </h1>
 		<br>
 		
