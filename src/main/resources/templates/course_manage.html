@@ -93,19 +93,6 @@
 					button.style.display = 'flex';
 				}
 				
-				function submitForm(event, id) {
-					let form = document.getElementById('f'+id);
-					let fid = document.getElementById('id'+id);
-					let fname = document.getElementById('name'+id);
-					
-					form.appendChild(fid);
-					form.appendChild(fname);
-					
-					form.submit();
-					
-					event.target.style.display = "none";
-				}
-				
 				console.log('course executed');
 		</script>
 	</head>
@@ -133,6 +120,9 @@
 			</tr>
 			
 			<tr th:each="course : ${courses}" style="color: white">
+			
+				<form th:action="@{'/courses/update/'+${course.courseID}}" method="post" style="display:flex">
+			
 				<td class="tdmain">
 					<input type="text" th:id="'id'+${course.courseID}" name="courseID" th:value="${course.courseID}" disabled/>
 				</td>
@@ -153,14 +143,10 @@
 							</g>
 						</g>
 						</svg>
-					</a>
-					
-					<a th:attr="onclick=|submitForm(event, '${course.courseID}')|" th:id="'b'+${course.courseID}" style="display:none">
-						clicklol
-					</a>
-					
-					<form th:id="'f'+${course.courseID}" th:action="@{'/courses/update/'+${course.courseID}}" method="post" style="display:none"></form>
+					</a>					
+					<input type="submit" th:id="'b'+${course.courseID}" style="display: none"/>
 				</td>
+				</form>
 			</tr>
 			<tr>
 				<td class="tdmain" colspan="2">
