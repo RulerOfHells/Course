@@ -130,7 +130,7 @@
 					<input type="text" th:id="'name'+${course.courseID}" name="courseName" th:value="${course.courseName}" disabled/>
 				</td>
 				<td class="editX">
-					<a th:href="@{'/courses/remove/'+${course.courseID}}">
+					<a th:href="@{'/courses/remove/'+${course.courseID}}" onclick="if(!confirm('Are you sure you want remove this course?')) return false">
 						<svg width="20" height="20" viewbox="0 0 40 40"><path d="M 10,10 L 30,30 M 30,10 L 10,30" stroke="red" stroke-width="4" /> </svg>
 					</a>
 					

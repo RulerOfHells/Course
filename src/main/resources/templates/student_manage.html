@@ -162,7 +162,7 @@
 					</div>
 				</td>
 				<td class="editX">
-					<a th:href="@{'/students/remove/'+${student.rollNo}}">
+					<a th:href="@{'/students/remove/'+${student.rollNo}}" onclick="if(!confirm('Are you sure you want remove this student?')) return false">
 						<svg width="20" height="20" viewbox="0 0 40 40"><path d="M 10,10 L 30,30 M 30,10 L 10,30" stroke="red" stroke-width="4" /> </svg>
 					</a>
 					
