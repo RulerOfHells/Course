@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConf {
 
-	private static final String[] PUBLIC_URLS = {"/", "/login"};
+	private static final String[] PUBLIC_URLS = {"/", "/login", "/home"};
 	private static final String[] DELETE_URLS = {"/users/delete/**", "/courses/delete/**", "/students/delete/**"};
 
 	@Autowired
