@@ -9,8 +9,10 @@
 	<h1 style="text-align:center; color:blue">Send courses to email</h1>
 	<br><br>
 	<form action="/sendEmail" style="text-align:center">
+			<label style="color:white"> Enter name </label>
+			<input type="text" name="name" required/>
 			<label style="color:white"> Enter email </label>
-			<input type="email" name="email" />
+			<input type="email" name="email" required/>
 			<input type="submit" value="send" />
 	</form>
 </body>

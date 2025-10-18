@@ -1,4 +1,4 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.rohan.dev.course.dto.Course;
+import com.rohan.dev.course.dto.CourseDTO;
 import com.rohan.dev.course.exceptions.CourseNotFoundException;
 import com.rohan.dev.course.exceptions.InvalidCourseException;
-import com.rohan.dev.course.services.CourseService;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.service.CourseService;
+import com.rohan.dev.course.service.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ public class CourseController {
 	StudentService studentService;
 	
 	@PostMapping("/courses/add")
-	public String createCourse(@Valid Course course, BindingResult result, RedirectAttributes redirectAttribute) throws InvalidCourseException {
+	public String createCourse(@Valid CourseDTO course, BindingResult result, RedirectAttributes redirectAttribute) throws InvalidCourseException {
 		
 		if(result.hasErrors()) {
 			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);
@@ -47,7 +47,7 @@ public class CourseController {
 	}
 	
 	@GetMapping("/courses/get/{id}")
-	public Course getCourse(@PathVariable int id) throws CourseNotFoundException {
+	public CourseDTO getCourse(@PathVariable int id) throws CourseNotFoundException {
 		try {
 			return courseService.getCourse(id);
 		}
@@ -57,7 +57,7 @@ public class CourseController {
 	}
 	
 	@PostMapping("/courses/update/{id}")
-	public String updateCourse(@Valid Course course, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttribute) throws InvalidCourseException, CourseNotFoundException {
+	public String updateCourse(@Valid CourseDTO course, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttribute) throws InvalidCourseException, CourseNotFoundException {
 		
 		if(result.hasErrors()) {
 			redirectAttribute.addFlashAttribute("org.springframework.validation.BindingResult.errCourse", result);

@@ -9,8 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
-import com.rohan.dev.course.dto.Course;
-import com.rohan.dev.course.dto.Student;
+import com.rohan.dev.course.dto.CourseDTO;
+import com.rohan.dev.course.dto.StudentDTO;
 
 @SpringBootTest
 public class APIJsonTest {
@@ -19,7 +19,7 @@ public class APIJsonTest {
 	
 	@Test
 	void checkJsonFormatForCourse() {
-		ResponseEntity<Course> expected = restTemplate.getForEntity(URI.create("http://localhost:80/api/courses/2"), Course.class);
+		ResponseEntity<CourseDTO> expected = restTemplate.getForEntity(URI.create("http://localhost:80/api/courses/2"), CourseDTO.class);
 		assertThat(expected.getBody()).isNotNull();
 		assertThat(expected.getBody()).hasFieldOrProperty("courseID");
 		assertThat(expected.getBody()).hasFieldOrProperty("courseName");
@@ -27,7 +27,7 @@ public class APIJsonTest {
 	
 	@Test
 	void checkJsonFormatForStudent() {
-		ResponseEntity<Student> expected = restTemplate.getForEntity(URI.create("http://localhost:80/api/students/1"), Student.class);
+		ResponseEntity<StudentDTO> expected = restTemplate.getForEntity(URI.create("http://localhost:80/api/students/1"), StudentDTO.class);
 		assertThat(expected.getBody()).isNotNull();
 		assertThat(expected.getBody()).hasFieldOrProperty("rollNo");
 		assertThat(expected.getBody()).hasFieldOrProperty("StudentName");

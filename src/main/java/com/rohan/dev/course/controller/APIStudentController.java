@@ -1,9 +1,15 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
+
+import static java.time.LocalDateTime.now;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,11 +20,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.rohan.dev.course.dto.Student;
+import com.rohan.dev.course.domain.APIResponse;
+import com.rohan.dev.course.dto.StudentDTO;
 import com.rohan.dev.course.exceptions.InvalidStudentException;
 import com.rohan.dev.course.exceptions.StudentNotFoundException;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.service.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -31,18 +39,24 @@ public class APIStudentController {
 	StudentService studentService;
 	
 	@PostMapping("/students")
-	public Student createStudent(@Valid @RequestBody Student student) throws InvalidStudentException {
+	public ResponseEntity<APIResponse> createStudent(@Valid @RequestBody StudentDTO student) throws InvalidStudentException {
 		try {
 			studentService.addStudent(student);
 		}
 		catch(IllegalArgumentException e) {
 			throw new InvalidStudentException("Invalid student. Student with Roll No: " + student.getRollNo() + " already exists!");
 		}
-		return student;
+		return ResponseEntity.created(getUri()).body(
+				new APIResponse().setTimeStamp(now().toString())
+				 .setData(Map.of("student", student))
+				 .setMessage("Student created!")
+				 .setStatus(HttpStatus.CREATED)
+				 .setStatusCode(HttpStatus.CREATED.value())
+				);
 	}
 	
 	@GetMapping("/students")
-	public List<Student> getStudents() throws StudentNotFoundException {
+	public List<StudentDTO> getStudents() throws StudentNotFoundException {
 		try {
 			return studentService.getAllStudents();
 		}
@@ -52,9 +66,9 @@ public class APIStudentController {
 	}
 	
 	@GetMapping("/students/{id}")
-	public Student getStudent(@PathVariable int id) throws StudentNotFoundException {
+	public StudentDTO getStudent(@PathVariable int id) throws StudentNotFoundException {
 		try {
-			return studentService.getStudentById(id);
+			return studentService.getStudent(id);
 		}
 		catch(IllegalArgumentException e) {
 			throw new StudentNotFoundException("Student with Roll No: " + id +" not found!");
@@ -62,7 +76,7 @@ public class APIStudentController {
 	}
 	
 	@PutMapping("/students/{id}")
-	public Student updateStudent(@Valid @RequestBody Student student, @PathVariable int id) throws StudentNotFoundException, InvalidStudentException {
+	public StudentDTO updateStudent(@Valid @RequestBody StudentDTO student, @PathVariable int id) throws StudentNotFoundException, InvalidStudentException {
 		try {
 			studentService.updateStudent(id, student);
 		}
@@ -76,13 +90,17 @@ public class APIStudentController {
 	}
 	
 	@DeleteMapping("/students/{id}")
-	public Student deleteStudent(@PathVariable int id) throws StudentNotFoundException {
+	public StudentDTO deleteStudent(@PathVariable int id) throws StudentNotFoundException {
 		try {
 			return studentService.removeStudent(id);
 		}
 		catch (IllegalStateException e) {
 			throw new StudentNotFoundException("Student with Roll No: " + id + " doesn't exists!");
 		}
+	}
+	
+	private URI getUri() {
+		return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/students/<studentID>").toUriString());
 	}
 	
     @ExceptionHandler(MethodArgumentNotValidException.class)

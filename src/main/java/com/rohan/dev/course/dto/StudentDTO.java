@@ -5,7 +5,7 @@ import java.util.List;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-public class Student {
+public class StudentDTO {
 	@Size(min = 3, message = "{student.valid.name}")
 	private String studentName;
 	
@@ -18,14 +18,14 @@ public class Student {
 
 	private List<Integer> courses;
 	
-	public Student(int rollNo, String studentName, int age, List<Integer> courses) {
+	public StudentDTO(int rollNo, String studentName, int age, List<Integer> courses) {
 		this.studentName = studentName;
 		this.age = age;
 		this.courses = courses;
 		this.rollNo = rollNo;
 	}
 	
-	public Student() {}
+	public StudentDTO() {}
 	
 	public int getRollNo() {
 		return rollNo;

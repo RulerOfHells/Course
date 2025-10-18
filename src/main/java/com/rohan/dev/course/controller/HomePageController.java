@@ -1,4 +1,4 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.rohan.dev.course.services.CourseService;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.exceptions.CourseNotFoundException;
+import com.rohan.dev.course.exceptions.StudentNotFoundException;
+import com.rohan.dev.course.service.CourseService;
+import com.rohan.dev.course.service.StudentService;
 
 @Controller
 public class HomePageController {
@@ -25,6 +27,11 @@ public class HomePageController {
 	}
 	
 	@GetMapping("/")
+	public String goHome() {
+		return "redirect:/home";
+	}
+	
+	@GetMapping("/home")
 	public ModelAndView home(ModelAndView mv) {
 		
 		mv.setViewName("index");
@@ -33,18 +40,24 @@ public class HomePageController {
 	
 	@RequestMapping(value = "/courses", method = {RequestMethod.GET, RequestMethod.POST})
 	public ModelAndView manageCourse(ModelAndView mv) {
-		
-		mv.addObject("courses", courseService.getAllCourses());
-		mv.setViewName("course_manage");
+		try {
+			mv.addObject("courses", courseService.getAllCourses());
+			mv.setViewName("course_manage");
+		} catch(IllegalStateException e) {
+			throw new CourseNotFoundException("No courses available!");
+		}
 		return mv;
 	}
 	
 	@RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST})
 	public ModelAndView manageStudent(ModelAndView mv) {
-		
-		mv.addObject("courses", courseService.getAllCourses());
-		mv.addObject("students", studentService.getAllStudents());
-		mv.setViewName("student_manage");
+		try {
+			mv.addObject("courses", courseService.getAllCourses());
+			mv.addObject("students", studentService.getAllStudents());
+			mv.setViewName("student_manage");
+		} catch(IllegalStateException e) {
+			throw new StudentNotFoundException("No students available!");
+		}
 		return mv;
 	}
 	

@@ -1,4 +1,4 @@
-package com.rohan.dev.course.dao;
+package com.rohan.dev.course.repository.impl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,33 +8,31 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.rohan.dev.course.dto.Course;
+import com.rohan.dev.course.domain.Course;
+import com.rohan.dev.course.repository.CourseRepository;
 
 @Repository
-public class CourseDAO {
+public class CourseRepositoryImpl implements CourseRepository {
 	
 	private JdbcTemplate jdbcTemplate;
 	private BeanPropertyRowMapper<Course> rowMapper;
 	private String sql;
 	
 	@Autowired
-	public CourseDAO(JdbcTemplate jdbcTemplate) {
+	public CourseRepositoryImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.rowMapper = BeanPropertyRowMapper.newInstance(Course.class);
-		init();
 	}
 	
-	private void init() {
-		jdbcTemplate.execute("create table if not exists Courses(ID int, CourseName varchar(20))");
-	}
-	
+	@Override
 	public void addCourse(Course course) {
-		sql = "insert into courses values(?, ?)";
+		sql = "insert into Courses values(?, ?)";
 		jdbcTemplate.update(sql, course.getCourseID(), course.getCourseName());
 	}
 	
+	@Override
 	public void batchAdd(List<Course> courses) {
-		sql = "insert into courses values(?, ?)";
+		sql = "insert into Courses values(?, ?)";
 		
 		List<Object[]> args = new LinkedList<>();
 		
@@ -44,13 +42,15 @@ public class CourseDAO {
 		jdbcTemplate.batchUpdate(sql, args);
 	}
 	
+	@Override
 	public List<Course> getAllCourses() {
-		sql = "select ID as courseID, courseName from courses";
+		sql = "select courseID, courseName from Courses";
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 	
-	public Course getCourse(int id) {
-		sql = "select ID as courseID, courseName from courses where ID = ?";
+	@Override
+	public Course getCourseById(int id) {
+		sql = "select courseID, courseName from Courses where courseID = ?";
 		List<Course> course = jdbcTemplate.query(sql, rowMapper, id);
 		if(course.size() == 0)
 			return null;
@@ -58,18 +58,15 @@ public class CourseDAO {
 		
 	}
 	
+	@Override
 	public void updateCourse(int id, Course course) {
-		sql = "update courses set id=?, courseName=? where id=?";
+		sql = "update Courses set courseID=?, courseName=? where courseID=?";
 		jdbcTemplate.update(sql, course.getCourseID(), course.getCourseName(), id);
 	}
 	
+	@Override
 	public void deleteCourse(int id) {
-		sql = "delete from courses where id=?";
+		sql = "delete from Courses where courseID=?";
 		jdbcTemplate.update(sql, id);
-	}
-	
-	public void clear() {
-		sql = "truncate table courses";
-		jdbcTemplate.execute(sql);
 	}
 }

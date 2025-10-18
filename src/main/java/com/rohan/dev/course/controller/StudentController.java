@@ -1,4 +1,4 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.rohan.dev.course.dto.Course;
-import com.rohan.dev.course.dto.Student;
+import com.rohan.dev.course.dto.CourseDTO;
+import com.rohan.dev.course.dto.StudentDTO;
 import com.rohan.dev.course.editors.StudentCoursesEditor;
 import com.rohan.dev.course.exceptions.InvalidStudentException;
 import com.rohan.dev.course.exceptions.StudentNotFoundException;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.service.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -29,12 +29,12 @@ public class StudentController {
 	
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
-		binder.registerCustomEditor(Course.class,"courses", new StudentCoursesEditor());
+		binder.registerCustomEditor(CourseDTO.class,"courses", new StudentCoursesEditor());
 	}
 	
 	
 	@PostMapping("/students/add")
-	public String createStudent(@Valid Student student, BindingResult result, RedirectAttributes redirectAttributes) throws InvalidStudentException {
+	public String createStudent(@Valid StudentDTO student, BindingResult result, RedirectAttributes redirectAttributes) throws InvalidStudentException {
 		
 		if(result.hasErrors()) {
 			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.errStudent", result);
@@ -53,7 +53,7 @@ public class StudentController {
 	}
 	
 	@PostMapping("/students/update/{id}")
-	public String updateStudent(@Valid Student student, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttributes) throws StudentNotFoundException, InvalidStudentException {
+	public String updateStudent(@Valid StudentDTO student, BindingResult result, @PathVariable int id, RedirectAttributes redirectAttributes) throws StudentNotFoundException, InvalidStudentException {
 		
 		if(result.hasErrors()) {
 			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.errStudent", result);

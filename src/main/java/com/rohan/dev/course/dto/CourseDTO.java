@@ -3,19 +3,19 @@ package com.rohan.dev.course.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-public class Course {
+public class CourseDTO {
 	@Min(value = 1, message = "{course.valid.id}")
 	private int courseID;
 	
 	@Size(min = 4, message = "{course.valid.name}")
 	private String courseName;
 	
-	public Course(int courseID, String courseName) {
+	public CourseDTO(int courseID, String courseName) {
 		this.setCourseID(courseID);
 		this.setCourseName(courseName);
 	}
 
-	public Course() {}
+	public CourseDTO() {}
 	
 	public int getCourseID() {
 		return courseID;

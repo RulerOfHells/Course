@@ -1,9 +1,15 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
+
+import static java.time.LocalDateTime.now;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,12 +20,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.rohan.dev.course.dto.Course;
+import com.rohan.dev.course.domain.APIResponse;
+import com.rohan.dev.course.dto.CourseDTO;
 import com.rohan.dev.course.exceptions.CourseNotFoundException;
 import com.rohan.dev.course.exceptions.InvalidCourseException;
-import com.rohan.dev.course.services.CourseService;
-import com.rohan.dev.course.services.StudentService;
+import com.rohan.dev.course.service.CourseService;
+import com.rohan.dev.course.service.StudentService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -35,18 +43,24 @@ public class APICourseController {
 	StudentService studentService;
 	
 	@PostMapping("/courses")
-	public Course createCourse(@Valid @RequestBody Course course) throws IOException, InvalidCourseException {
+	public ResponseEntity<APIResponse> createCourse(@Valid @RequestBody CourseDTO course) throws IOException, InvalidCourseException {
 		try {
 			courseService.addCourse(course);
 		}
 		catch(IllegalArgumentException e) {
 			throw new InvalidCourseException("Invalid course! Course with ID: " + course.getCourseID() + " already exists!");
 		}
-		return course;
+		return ResponseEntity.created(getUri()).body(
+				new APIResponse().setTimeStamp(now().toString())
+				 .setData(Map.of("course", course))
+				 .setMessage("Course created!")
+				 .setStatus(HttpStatus.CREATED)
+				 .setStatusCode(HttpStatus.CREATED.value())
+				);
 	}
 	
 	@GetMapping("/courses")
-	public List<Course> getCourses() throws IOException, CourseNotFoundException {
+	public List<CourseDTO> getCourses() throws IOException, CourseNotFoundException {
 		try {
 			return courseService.getAllCourses();
 		}
@@ -56,7 +70,7 @@ public class APICourseController {
 	}
 	
 	@GetMapping("/courses/{id}")
-	public Course getCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
+	public CourseDTO getCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
 		try {
 			return courseService.getCourse(id);
 		}
@@ -66,7 +80,7 @@ public class APICourseController {
 	}
 	
 	@PutMapping("/courses/{id}")
-	public Course updateCourse(@Valid @RequestBody Course course, @PathVariable int id) throws IOException, CourseNotFoundException, InvalidCourseException {
+	public CourseDTO updateCourse(@Valid @RequestBody CourseDTO course, @PathVariable int id) throws IOException, CourseNotFoundException, InvalidCourseException {
 		
 		try {
 			if(id != course.getCourseID())
@@ -83,7 +97,7 @@ public class APICourseController {
 	}
 	
 	@DeleteMapping("/courses/{id}")
-	public Course deleteCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
+	public CourseDTO deleteCourse(@PathVariable int id) throws IOException, CourseNotFoundException {
 		try {
 			studentService.unassignCourseFromAllStudents(id);
 			return courseService.removeCourse(id);
@@ -91,6 +105,10 @@ public class APICourseController {
 		catch (IllegalStateException e) {
 			throw new CourseNotFoundException("Course with ID: " + id + " doesn't exists!");
 		}
+	}
+	
+	private URI getUri() {
+		return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/courses/<courseID>").toUriString());
 	}
 	
     @ExceptionHandler(MethodArgumentNotValidException.class)

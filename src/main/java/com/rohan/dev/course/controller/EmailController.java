@@ -1,14 +1,13 @@
-package com.rohan.dev.course.controllers;
+package com.rohan.dev.course.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.rohan.dev.course.services.CourseService;
+import com.rohan.dev.course.service.CourseService;
+import com.rohan.dev.course.service.EmailService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -16,7 +15,7 @@ import jakarta.servlet.http.HttpSession;
 public class EmailController {
 
 	@Autowired
-	private JavaMailSender mailSender;
+	private EmailService emailService;
 	
 	@Autowired
 	private CourseService service;
@@ -34,16 +33,12 @@ public class EmailController {
 	}
 	
 	@GetMapping("/sendEmail")
-	public String sendEmail(@RequestParam(required = false, defaultValue = "0") String email, Model model, HttpSession session) {
-		var sms = new SimpleMailMessage();
+	public String sendEmail(@RequestParam String email, @RequestParam String name, Model model, HttpSession session) {
+
+		String subject = "Regarding sending emails";
+		String text = "Dear "+name+",\n Courses are :\n" + getCoursesAsText() +"Kind Regards,\nThe Owner";
 		
-		sms.setTo(email);
-		sms.setSubject("Regarding sending emails");
-		sms.setText("Dear Rohan Tripathy,\n Courses are :\n" + getCoursesAsText() +"Kind Regards,\nThe Owner");
-		
-		mailSender.send(sms);
-		
-		model.addAttribute("name", session.getAttribute("Fun.name"));
+		emailService.sendMail(email, subject, text);
 		return "emailpage";
 	}
 }
