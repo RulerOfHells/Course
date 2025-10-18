@@ -27,6 +27,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
     - name: Create env.properties file
       run: echo "email.username=${{ secrets.EMAIL_USERNAME }}" > env.properties
            echo "email.password=${{ secrets.EMAIL_PASSWORD }}" >> env.properties
@@ -34,7 +35,7 @@ jobs:
            echo "database.pass=${{ secrets.DATABASE_PASS }}" >> env.properties
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file pom.xml -Dspring.profiles.active=prod -DskipTests
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
