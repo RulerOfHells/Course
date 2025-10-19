@@ -33,7 +33,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 		
 		if(student.getCourses() == null) return;
 		
-		sql = "insert into students_courses values(?, ?)";
+		sql = "insert into Students_courses values(?, ?)";
 		
 		for(var cid : student.getCourses())
 			jdbcTemplate.update(sql, student.getRollNo(), cid);
@@ -42,7 +42,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 	@Override
 	public void batchAdd(List<Student> students) {
 		sql = "insert into Students values(?, ?, ?)";
-		String sql2 = "insert into students_courses values(?, ?)";
+		String sql2 = "insert into Students_courses values(?, ?)";
 		
 		List<Object[]> args = new LinkedList<>();
 		
@@ -58,7 +58,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 	
 	@Override
 	public List<Student> getAllStudents() {
-		sql = "select * from students";
+		sql = "select * from Students";
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 	
@@ -73,25 +73,25 @@ public class StudentRepositoryImpl implements StudentRepository {
 	
 	@Override
 	public List<Integer> getStudentCourses(int rollNo) {
-		sql = "select courseID from students_courses where rollNo=?";
+		sql = "select courseID from Students_courses where rollNo=?";
 		
 		return jdbcTemplate.query(sql, (RowMapper<Integer>) (arg0, arg1) -> Integer.parseInt(arg0.getObject("courseID").toString()), rollNo);
 	}
 	
 	@Override
 	public void unassignCourseFromAllStudents(int courseId) {
-	    String sql = "DELETE FROM students_courses WHERE courseID = ?";
+	    String sql = "DELETE FROM Students_courses WHERE courseID = ?";
 	    jdbcTemplate.update(sql, courseId);
 	}
 	
 	@Override
 	public void updateStudent(int id, Student student) {
-		sql = "update students set rollNo=?, studentName=?, age=? where rollNo=?";
+		sql = "update Students set rollNo=?, studentName=?, age=? where rollNo=?";
 		
 		jdbcTemplate.update(sql, student.getRollNo(), student.getStudentName(), student.getAge(), id);
 		jdbcTemplate.update("delete from students_courses where rollNo=?", id);
 		
-		sql = "insert into students_courses values(?, ?)";
+		sql = "insert into Students_courses values(?, ?)";
 		
 		if(student.getCourses() != null)
 			for(Integer cid : student.getCourses())
@@ -101,7 +101,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 	
 	@Override
 	public void deleteStudent(int id) {
-		sql = "delete from students_courses where rollNo=?";
+		sql = "delete from Students_courses where rollNo=?";
 		jdbcTemplate.update(sql, id);
 		
 		sql = "delete from Students where rollNo=?";
