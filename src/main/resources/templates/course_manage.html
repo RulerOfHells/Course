@@ -16,7 +16,7 @@
 						colors: {
 							'primary': '#6366f1', // Indigo-500
 							'primary-dark': '#4f46e5', // Indigo-600
-							'accent': '#10b981', // Emerald-500
+							'accent': '#6e83eb', // Emerald-500
 						},
 						fontFamily: {
 							sans: ['Inter', 'sans-serif'],
@@ -50,11 +50,38 @@
 			START: Navigation Bar (CourseManager App Link) 
 		-->
 		<header class="bg-gray-800 shadow-lg sticky top-0 z-10">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
 				<!-- App Name as Link to Homepage -->
 				<a href="/" class="text-2xl font-extrabold tracking-tight text-primary hover:text-primary-dark transition duration-150">
 					CourseManager
 				</a>
+                <!-- RIGHT SIDE UTILS -->
+                <div class="flex items-center space-x-2">
+                    <a href="/contact" class="
+                        text-accent hover:text-white font-medium transition duration-150
+                        flex items-center space-x-2 p-2 rounded-lg
+                        hover:bg-gray-700/50
+                    ">
+                        <!-- Icon for Contact (Mail) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-6 9h6a2 2 0 002-2V7a2 2 0 00-2-2H3a2 2 0 00-2 2v10a2 2 0 002 2h10z" />
+                        </svg>
+                        <!-- Text visible on tablet/desktop, hidden on small mobile screens -->
+                        <span class="hidden sm:inline">Contact Us</span>
+                    </a>
+                    <a th:attr="onclick=|showLogoutConfirmation()|" class="
+                            text-white hover:text-red-500 font-medium transition duration-150
+                            flex items-center space-x-2 p-2 rounded-lg
+                            hover:bg-gray-700/50
+                        ">
+                        <!-- Icon for Logout (Door/Arrow) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <!-- Text visible on tablet/desktop, hidden on small mobile screens -->
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                </div>
 			</div>
 		</header>
 		<!-- END: Navigation Bar -->
@@ -177,7 +204,42 @@
 			<!-- API Information -->
 			<p class="text-gray-500 text-sm text-center mt-16">To use the API, send requests <a href="http://localhost:80/api/courses" class="text-primary hover:text-primary-dark underline">here</a></p>
 		</main>
-		
+
+        <!-- START: Custom Logout Confirmation Modal -->
+        <div id="logoutModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300">
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-sm border border-gray-700 transform transition-transform duration-300 scale-95 opacity-0" id="modalContent">
+                <h3 class="text-xl font-bold text-red-400 mb-4 flex items-center">
+                    <!-- Warning Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.398 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Confirm Logout
+                </h3>
+                <p class="text-gray-300 mb-6">
+                    Do you really want to log out? You will need to sign in again to access the CourseManager features.
+                </p>
+
+                <div class="flex justify-end space-x-3">
+                    <!-- Cancel Button -->
+                    <button onclick="hideLogoutConfirmation();"
+                            class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition duration-150">
+                        Cancel
+                    </button>
+
+                    <!-- Confirm Logout Button -->
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit"
+                                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition duration-150 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Yes, Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
 		<!-- 
 			START: JavaScript for Functionality and Custom UI 
 		-->
@@ -298,6 +360,33 @@
 					submitButton.style.display = 'block';
 				}
 			}
+
+            function showLogoutConfirmation() {
+                const modal = document.getElementById('logoutModal');
+                const content = document.getElementById('modalContent');
+
+                modal.classList.remove('hidden');
+
+                // Trigger transitions after a short delay
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    content.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            }
+
+            // Hides the logout confirmation modal with transitions
+            function hideLogoutConfirmation() {
+                const modal = document.getElementById('logoutModal');
+                const content = document.getElementById('modalContent');
+
+                modal.style.opacity = '0';
+                content.classList.add('scale-95', 'opacity-0');
+
+                // Hide the modal completely after the transition ends
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // Must match the transition duration
+            }
 			
 			console.log('course executed');
 		</script>

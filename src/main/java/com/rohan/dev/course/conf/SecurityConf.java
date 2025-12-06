@@ -1,5 +1,8 @@
 package com.rohan.dev.course.conf;
 
+import com.rohan.dev.course.handlers.APIAccessDeniedHandler;
+import com.rohan.dev.course.handlers.APIAuthenticationEntryPoint;
+import com.rohan.dev.course.handlers.LoginFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +11,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,15 +20,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.rohan.dev.course.handlers.APIAccessDeniedHandler;
-import com.rohan.dev.course.handlers.APIAuthenticationEntryPoint;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConf {
 
-	private static final String[] PUBLIC_URLS = {"/", "/login"};
+	private static final String[] PUBLIC_URLS = {"/", "/login", "/process-login", "/logout"};
 	private static final String[] DELETE_URLS = {"/users/remove/**", "/courses/remove/**", "/students/remove/**"};
 	private static final String[] API_DELETE_URLS = {"/api/users/remove/**", "/api/courses/remove/**", "/api/students/remove/**"};
 	private static final String[] API_PUBLIC_URLS = {"/api/login/**"};
@@ -39,6 +38,9 @@ public class SecurityConf {
 	
 	@Autowired
 	private APIAuthenticationEntryPoint apiAuthEntryPoint;
+
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
 	
 	@Autowired
 	private UserDetailsService userDetailsService;
@@ -62,8 +64,7 @@ public class SecurityConf {
 			})
 			
 			.exceptionHandling(eh -> eh.accessDeniedHandler(apiADHandler).authenticationEntryPoint(apiAuthEntryPoint));
-			
-		
+
 		return https.build();
 	}
 	
@@ -71,8 +72,18 @@ public class SecurityConf {
 	public SecurityFilterChain webSecurityFilterChain(HttpSecurity https) throws Exception {
 		
 		https
-			.formLogin(Customizer.withDefaults())
-			.httpBasic(Customizer.withDefaults())
+			.formLogin(flc -> {
+                flc.loginPage("/login");
+                flc.usernameParameter("email");
+                flc.loginProcessingUrl("/process-login");
+                flc.defaultSuccessUrl("/", false);
+                flc.failureHandler(loginFailureHandler);
+            })
+            .logout(loc -> {
+                loc.logoutUrl("/logout");
+                loc.logoutSuccessUrl("/login");
+                loc.clearAuthentication(true);
+            })
 			.cors(AbstractHttpConfigurer::disable)
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 		

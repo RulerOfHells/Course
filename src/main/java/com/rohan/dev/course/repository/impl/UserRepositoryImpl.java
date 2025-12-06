@@ -1,22 +1,13 @@
 package com.rohan.dev.course.repository.impl;
 
-import static com.rohan.dev.course.enumeration.RoleType.ROLE_USER;
-import static com.rohan.dev.course.enumeration.VerificationType.ACCOUNT;
-import static com.rohan.dev.course.repository.query.UserQuery.COUNT_EMAIL_QUERY;
-import static com.rohan.dev.course.repository.query.UserQuery.DELETE_MFA_CODE_QUERY;
-import static com.rohan.dev.course.repository.query.UserQuery.INSERT_ACCOUNT_VERIFICATION_URL_QUERY;
-import static com.rohan.dev.course.repository.query.UserQuery.INSERT_MFA_CODE_QUERY;
-import static com.rohan.dev.course.repository.query.UserQuery.INSERT_USER_QUERY;
-import static com.rohan.dev.course.repository.query.UserQuery.SELECT_USER_BY_EMAIL_QUERY;
-import static java.util.Objects.requireNonNull;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Logger;
-
+import com.rohan.dev.course.domain.Role;
+import com.rohan.dev.course.domain.User;
+import com.rohan.dev.course.domain.UserPrinciple;
+import com.rohan.dev.course.dto.UserDTO;
+import com.rohan.dev.course.exceptions.ApiException;
+import com.rohan.dev.course.repository.RoleRepository;
+import com.rohan.dev.course.repository.UserRepository;
+import com.rohan.dev.course.service.EmailService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -36,14 +27,17 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.rohan.dev.course.domain.Role;
-import com.rohan.dev.course.domain.User;
-import com.rohan.dev.course.domain.UserPrinciple;
-import com.rohan.dev.course.dto.UserDTO;
-import com.rohan.dev.course.exceptions.ApiException;
-import com.rohan.dev.course.repository.RoleRepository;
-import com.rohan.dev.course.repository.UserRepository;
-import com.rohan.dev.course.service.EmailService;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Logger;
+
+import static com.rohan.dev.course.enumeration.RoleType.ROLE_USER;
+import static com.rohan.dev.course.enumeration.VerificationType.ACCOUNT;
+import static com.rohan.dev.course.repository.query.UserQuery.*;
+import static java.util.Objects.requireNonNull;
 
 @Repository
 @Transactional
@@ -155,7 +149,8 @@ public class UserRepositoryImpl implements UserRepository<User>, UserDetailsServ
 			return user;
 		}
 		catch(EmptyResultDataAccessException e) {
-			throw new ApiException("User not found with email: "+email);
+            logs.warning("User not found with email: "+email);
+			throw new UsernameNotFoundException("User not found with email: "+email);
 		}
 		catch(Exception e) {
 			logs.severe(e.getMessage());
