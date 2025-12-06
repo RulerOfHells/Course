@@ -3,46 +3,98 @@ package com.rohan.dev.course.conf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.rohan.dev.course.handlers.APIAccessDeniedHandler;
+import com.rohan.dev.course.handlers.APIAuthenticationEntryPoint;
+
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConf {
 
-	private static final String[] PUBLIC_URLS = {"/", "/login", "/home"};
-	private static final String[] DELETE_URLS = {"/users/delete/**", "/courses/delete/**", "/students/delete/**"};
+	private static final String[] PUBLIC_URLS = {"/", "/login"};
+	private static final String[] DELETE_URLS = {"/users/remove/**", "/courses/remove/**", "/students/remove/**"};
+	private static final String[] API_DELETE_URLS = {"/api/users/remove/**", "/api/courses/remove/**", "/api/students/remove/**"};
+	private static final String[] API_PUBLIC_URLS = {"/api/login/**"};
 
 	@Autowired
 	private BCryptPasswordEncoder encoder;
+	
+	@Autowired
+	private APIAccessDeniedHandler apiADHandler;
+	
+	@Autowired
+	private APIAuthenticationEntryPoint apiAuthEntryPoint;
+	
+	@Autowired
+	private UserDetailsService userDetailsService;
+	
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
+	@Order(1)
+	public SecurityFilterChain apiSecurityFilterChain(HttpSecurity https) throws Exception {
 		
-		https.cors(cors -> cors.disable());
-		https.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-		https.authorizeHttpRequests(ahr -> ahr.requestMatchers(PUBLIC_URLS).permitAll());
-		https.authorizeHttpRequests(ahr -> ahr.requestMatchers(HttpMethod.DELETE, DELETE_URLS[0]).hasAnyAuthority("DELETE:USER"));
-		https.authorizeHttpRequests(ahr -> ahr.requestMatchers(HttpMethod.DELETE, DELETE_URLS[1]).hasAnyAuthority("DELETE:COURSE"));
-		https.authorizeHttpRequests(ahr -> ahr.requestMatchers(HttpMethod.DELETE, DELETE_URLS[2]).hasAnyAuthority("DELETE:STUDENT"));
-		https.exceptionHandling(eh -> eh.accessDeniedHandler(null).authenticationEntryPoint(null));
+		https
+			.securityMatcher("/api/**")
+			.cors(AbstractHttpConfigurer::disable)
+			.csrf(AbstractHttpConfigurer::disable)
+			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		
-		https.authorizeHttpRequests(ahr -> ahr.anyRequest().authenticated());
+			.authorizeHttpRequests(ahr -> {
+				ahr.requestMatchers(API_PUBLIC_URLS).permitAll();
+				ahr.requestMatchers(HttpMethod.DELETE, API_DELETE_URLS[0]).hasAnyAuthority("DELETE:USER");
+				ahr.requestMatchers(HttpMethod.DELETE, API_DELETE_URLS[1]).hasAnyAuthority("DELETE:COURSE");
+				ahr.requestMatchers(HttpMethod.DELETE, API_DELETE_URLS[2]).hasAnyAuthority("DELETE:STUDENT");
+				ahr.anyRequest().authenticated();
+			})
+			
+			.exceptionHandling(eh -> eh.accessDeniedHandler(apiADHandler).authenticationEntryPoint(apiAuthEntryPoint));
+			
+		
+		return https.build();
+	}
+	
+	@Bean
+	public SecurityFilterChain webSecurityFilterChain(HttpSecurity https) throws Exception {
+		
+		https
+			.formLogin(Customizer.withDefaults())
+			.httpBasic(Customizer.withDefaults())
+			.cors(AbstractHttpConfigurer::disable)
+			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+		
+			.authorizeHttpRequests(ahr -> {
+				ahr.requestMatchers(PUBLIC_URLS).permitAll();
+				ahr.requestMatchers(HttpMethod.GET, DELETE_URLS[0]).hasAnyAuthority("DELETE:USER");
+				ahr.requestMatchers(HttpMethod.GET, DELETE_URLS[1]).hasAnyAuthority("DELETE:COURSE");
+				ahr.requestMatchers(HttpMethod.GET, DELETE_URLS[2]).hasAnyAuthority("DELETE:STUDENT");
+				ahr.anyRequest().authenticated();
+			})
+			
+			.exceptionHandling(eh -> eh.accessDeniedHandler(null).authenticationEntryPoint(null));
+			
+		
 		return https.build();
 	}
 	
 	@Bean
 	public AuthenticationManager authenticationManager() {
 		var authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(null);
+		authProvider.setUserDetailsService(userDetailsService);
 		authProvider.setPasswordEncoder(encoder);
-		
 		return new ProviderManager(authProvider);
 	}
 	

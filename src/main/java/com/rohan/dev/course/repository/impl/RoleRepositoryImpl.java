@@ -1,24 +1,28 @@
 package com.rohan.dev.course.repository.impl;
 
 import static com.rohan.dev.course.enumeration.RoleType.ROLE_USER;
-import static com.rohan.dev.course.repository.query.RoleQuery.*;
+import static com.rohan.dev.course.repository.query.RoleQuery.INSERT_ROLE_TO_USER_QUERY;
+import static com.rohan.dev.course.repository.query.RoleQuery.SELECT_ROLE_BY_ID_QUERY;
+import static com.rohan.dev.course.repository.query.RoleQuery.SELECT_ROLE_BY_NAME_QUERY;
 import static java.util.Objects.requireNonNull;
 
-import java.util.logging.Logger;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rohan.dev.course.domain.Role;
 import com.rohan.dev.course.exceptions.ApiException;
 import com.rohan.dev.course.repository.RoleRepository;
 
 @Repository
+@Transactional
 public class RoleRepositoryImpl implements RoleRepository<Role>{
 	
 	private BeanPropertyRowMapper<Role> rowMapper = BeanPropertyRowMapper.newInstance(Role.class);
@@ -26,7 +30,7 @@ public class RoleRepositoryImpl implements RoleRepository<Role>{
 	@Autowired
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	
-	private final Logger logs = Logger.getLogger("logs.txt");
+	private final Logger logs = Logger.getLogger(RoleRepositoryImpl.class.getName());
 	
 	@Override
 	public Role create(Role data) {
@@ -72,7 +76,17 @@ public class RoleRepositoryImpl implements RoleRepository<Role>{
 
 	@Override
 	public Role getRoleByUserId(long userID) {
-		return null;
+		logs.info("Fetching role by user ID: "+userID);
+		try {
+			return jdbcTemplate.queryForObject(SELECT_ROLE_BY_ID_QUERY, Map.of("userID", userID), rowMapper);
+		}
+		catch(EmptyResultDataAccessException e) {
+			throw new ApiException("Role " + ROLE_USER.name() +" not found!");
+		}
+		catch(Exception e) {
+			logs.severe(e.getMessage());
+			throw new ApiException("Something went wrong. Try again");
+		}
 	}
 
 	@Override

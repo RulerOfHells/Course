@@ -18,6 +18,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.rohan.dev.course.domain.APIResponse;
 import com.rohan.dev.course.domain.User;
+import com.rohan.dev.course.dto.LoginForm;
+import com.rohan.dev.course.dto.UserDTO;
 import com.rohan.dev.course.service.UserService;
 
 import jakarta.validation.Valid;
@@ -32,9 +34,11 @@ public class APIUserController {
 	private AuthenticationManager authenticationManager;
 	
 	@PostMapping("/login")
-	public ResponseEntity<APIResponse> login(String email, String password) {
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-		return null;
+	public ResponseEntity<APIResponse> login(@Valid LoginForm login) {
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword()));
+		UserDTO userDTO = userService.getUserFromEmail(login.getEmail());
+		
+		return (!userDTO.isUsingMFA())? sendResponse(userDTO) : sendVerificationCode(userDTO);
 	}
 	
 	@PostMapping("/users")
@@ -51,5 +55,24 @@ public class APIUserController {
 
 	private URI getUri() {
 		return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/get/<userID>").toUriString());
+	}
+	
+	private ResponseEntity<APIResponse> sendVerificationCode(UserDTO userDTO) {
+		userService.sendVerificationCode(userDTO);
+		return ResponseEntity.ok().body(
+				new APIResponse().setTimeStamp(now().toString())
+				 .setData(Map.of("user", userDTO))
+				 .setMessage("Verification Code sent!")
+				 .setStatus(HttpStatus.OK)
+				 .setStatusCode(HttpStatus.OK.value()));
+	}
+	
+	private ResponseEntity<APIResponse> sendResponse(UserDTO userDTO) {
+		return ResponseEntity.ok().body(
+				new APIResponse().setTimeStamp(now().toString())
+				 .setData(Map.of("user", userDTO))
+				 .setMessage("Login successful!")
+				 .setStatus(HttpStatus.OK)
+				 .setStatusCode(HttpStatus.OK.value()));
 	}
 }

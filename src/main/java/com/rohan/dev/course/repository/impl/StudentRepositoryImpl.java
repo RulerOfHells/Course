@@ -8,11 +8,13 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rohan.dev.course.domain.Student;
 import com.rohan.dev.course.repository.StudentRepository;
 
 @Repository
+@Transactional
 public class StudentRepositoryImpl implements StudentRepository {
 
 	private JdbcTemplate jdbcTemplate;

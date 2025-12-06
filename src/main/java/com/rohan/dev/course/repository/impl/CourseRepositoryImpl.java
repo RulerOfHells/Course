@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rohan.dev.course.domain.Course;
 import com.rohan.dev.course.repository.CourseRepository;
 
 @Repository
+@Transactional
 public class CourseRepositoryImpl implements CourseRepository {
 	
 	private JdbcTemplate jdbcTemplate;

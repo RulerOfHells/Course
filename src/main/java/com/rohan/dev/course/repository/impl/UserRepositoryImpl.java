@@ -3,35 +3,53 @@ package com.rohan.dev.course.repository.impl;
 import static com.rohan.dev.course.enumeration.RoleType.ROLE_USER;
 import static com.rohan.dev.course.enumeration.VerificationType.ACCOUNT;
 import static com.rohan.dev.course.repository.query.UserQuery.COUNT_EMAIL_QUERY;
+import static com.rohan.dev.course.repository.query.UserQuery.DELETE_MFA_CODE_QUERY;
 import static com.rohan.dev.course.repository.query.UserQuery.INSERT_ACCOUNT_VERIFICATION_URL_QUERY;
+import static com.rohan.dev.course.repository.query.UserQuery.INSERT_MFA_CODE_QUERY;
 import static com.rohan.dev.course.repository.query.UserQuery.INSERT_USER_QUERY;
+import static com.rohan.dev.course.repository.query.UserQuery.SELECT_USER_BY_EMAIL_QUERY;
 import static java.util.Objects.requireNonNull;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.rohan.dev.course.domain.Role;
 import com.rohan.dev.course.domain.User;
+import com.rohan.dev.course.domain.UserPrinciple;
+import com.rohan.dev.course.dto.UserDTO;
 import com.rohan.dev.course.exceptions.ApiException;
 import com.rohan.dev.course.repository.RoleRepository;
 import com.rohan.dev.course.repository.UserRepository;
 import com.rohan.dev.course.service.EmailService;
 
 @Repository
-public class UserRepositoryImpl implements UserRepository<User>{
+@Transactional
+public class UserRepositoryImpl implements UserRepository<User>, UserDetailsService {
 	
+	private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 	@Autowired
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	@Autowired
@@ -40,11 +58,14 @@ public class UserRepositoryImpl implements UserRepository<User>{
 	private BCryptPasswordEncoder encoder;
 	@Autowired
 	private EmailService emailService;
+	@Autowired
+	private RowMapper<User> rowMapper;
 	
-	private final Logger logs = Logger.getLogger("logs.txt");
+	private final Logger logs = Logger.getLogger(UserRepositoryImpl.class.getName());
 	
 	@Override
-	public User create(User user) {		if(getEmailCount(user.getEmail().trim().toLowerCase()) > 0)				//check for duplicate
+	public User create(User user) {
+		if(getEmailCount(user.getEmail().trim().toLowerCase()) > 0)				//check for duplicate
 			throw new ApiException("Email in use. Please use a different one");
 		
 		try {
@@ -75,22 +96,26 @@ public class UserRepositoryImpl implements UserRepository<User>{
 	
 	@Override
 	public Collection<User> list(int page, int pageSize) {
-		return null;
+
+		return null;
 	}
 
 	@Override
 	public User get(long id) {
-		return null;
+
+		return null;
 	}
 
 	@Override
 	public User update(User data) {
-		return null;
+
+		return null;
 	}
 
 	@Override
 	public boolean delete(long id) {
-		return false;
+
+		return false;
 	}
 	
 	private int getEmailCount(String email) {
@@ -108,5 +133,54 @@ public class UserRepositoryImpl implements UserRepository<User>{
 	
 	private String getVerificationUrl(String key, String type) {
 		return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
+	}
+
+
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		User user = getUserByEmail(email);
+		if(user == null) {
+			logs.warning("User not found");
+			throw new UsernameNotFoundException("User not found");
+		} else {
+			logs.info("User match found in database: "+email);
+			return new UserPrinciple(user, roleRepository.getRoleByUserId(user.getId()).getPerms());
+		}
+	}
+	
+	@Override
+	public User getUserByEmail(String email) {
+		try {
+			User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, Map.of("email", email), rowMapper);
+			return user;
+		}
+		catch(EmptyResultDataAccessException e) {
+			throw new ApiException("User not found with email: "+email);
+		}
+		catch(Exception e) {
+			logs.severe(e.getMessage());
+			throw new ApiException("Something went wrong. Try again");
+		}
+	}
+
+
+	@Override
+	public void sendVerificationCode(UserDTO userDTO) {
+		String expirationDate = DateFormatUtils.format(DateUtils.addDays(new Date(), 1), DATE_FORMAT);
+		String verificationCode = RandomStringUtils.randomAlphanumeric(8).toUpperCase();
+		
+		try {
+			jdbcTemplate.update(DELETE_MFA_CODE_QUERY, Map.of("userID", userDTO.getId()));
+			jdbcTemplate.update(INSERT_MFA_CODE_QUERY, Map.of("userID", userDTO.getId(), "code", verificationCode, "expDate", expirationDate));
+			sendEmail(userDTO.getEmail(), "From: CourseManager \nYour MFA code is "+verificationCode);
+		}
+		catch(Exception e) {
+			logs.severe(e.getMessage());
+			throw new ApiException("Something went wrong. Try again");
+		}
+	}
+	
+	private void sendEmail(String email, String message) {
+		emailService.sendMail(email, "MFA code", "Hi! you tried to login at "+LocalDateTime.now()+"\n"+message);
 	}
 }
