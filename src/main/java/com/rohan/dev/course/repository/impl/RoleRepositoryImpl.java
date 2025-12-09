@@ -25,7 +25,7 @@ import com.rohan.dev.course.repository.RoleRepository;
 @Transactional
 public class RoleRepositoryImpl implements RoleRepository<Role>{
 	
-	private BeanPropertyRowMapper<Role> rowMapper = BeanPropertyRowMapper.newInstance(Role.class);
+	private final BeanPropertyRowMapper<Role> rowMapper = BeanPropertyRowMapper.newInstance(Role.class);
 
 	@Autowired
 	private NamedParameterJdbcTemplate jdbcTemplate;

@@ -3,6 +3,7 @@ package com.rohan.dev.course.conf;
 import com.rohan.dev.course.handlers.APIAccessDeniedHandler;
 import com.rohan.dev.course.handlers.APIAuthenticationEntryPoint;
 import com.rohan.dev.course.handlers.LoginFailureHandler;
+import com.rohan.dev.course.providers.LoginAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,10 +25,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConf {
 
-	private static final String[] PUBLIC_URLS = {"/", "/login", "/process-login", "/logout"};
+	private static final String[] PUBLIC_URLS = {"/", "/login", "/process-login", "/logout", "/mfa-login"};
 	private static final String[] DELETE_URLS = {"/users/remove/**", "/courses/remove/**", "/students/remove/**"};
+	private static final String[] API_PUBLIC_URLS = {"/api/login/**", "/mfa-login"};
 	private static final String[] API_DELETE_URLS = {"/api/users/remove/**", "/api/courses/remove/**", "/api/students/remove/**"};
-	private static final String[] API_PUBLIC_URLS = {"/api/login/**"};
 
 	@Autowired
 	private BCryptPasswordEncoder encoder;
@@ -72,6 +72,7 @@ public class SecurityConf {
 	public SecurityFilterChain webSecurityFilterChain(HttpSecurity https) throws Exception {
 		
 		https
+            .authenticationManager(authenticationManager())
 			.formLogin(flc -> {
                 flc.loginPage("/login");
                 flc.usernameParameter("email");
@@ -103,7 +104,7 @@ public class SecurityConf {
 	
 	@Bean
 	public AuthenticationManager authenticationManager() {
-		var authProvider = new DaoAuthenticationProvider();
+		var authProvider = new LoginAuthenticationProvider();
 		authProvider.setUserDetailsService(userDetailsService);
 		authProvider.setPasswordEncoder(encoder);
 		return new ProviderManager(authProvider);

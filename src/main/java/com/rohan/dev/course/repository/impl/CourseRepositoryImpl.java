@@ -12,13 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.rohan.dev.course.domain.Course;
 import com.rohan.dev.course.repository.CourseRepository;
 
+import static com.rohan.dev.course.repository.query.CourseQuery.*;
+
 @Repository
 @Transactional
 public class CourseRepositoryImpl implements CourseRepository {
 	
-	private JdbcTemplate jdbcTemplate;
-	private BeanPropertyRowMapper<Course> rowMapper;
-	private String sql;
+	private final JdbcTemplate jdbcTemplate;
+	private final BeanPropertyRowMapper<Course> rowMapper;
 	
 	@Autowired
 	public CourseRepositoryImpl(JdbcTemplate jdbcTemplate) {
@@ -28,33 +29,28 @@ public class CourseRepositoryImpl implements CourseRepository {
 	
 	@Override
 	public void addCourse(Course course) {
-		sql = "insert into Courses values(?, ?)";
-		jdbcTemplate.update(sql, course.getCourseID(), course.getCourseName());
+		jdbcTemplate.update(INSERT_COURSE_QUERY, course.getCourseID(), course.getCourseName());
 	}
 	
 	@Override
 	public void batchAdd(List<Course> courses) {
-		sql = "insert into Courses values(?, ?)";
-		
 		List<Object[]> args = new LinkedList<>();
 		
 		for(var course : courses)
 			args.add(new Object[]{course.getCourseID(), course.getCourseName()});
 		
-		jdbcTemplate.batchUpdate(sql, args);
+		jdbcTemplate.batchUpdate(INSERT_COURSE_QUERY, args);
 	}
 	
 	@Override
 	public List<Course> getAllCourses() {
-		sql = "select courseID, courseName from Courses";
-		return jdbcTemplate.query(sql, rowMapper);
+		return jdbcTemplate.query(SELECT_ALL_COURSE_QUERY, rowMapper);
 	}
 	
 	@Override
 	public Course getCourseById(int id) {
-		sql = "select courseID, courseName from Courses where courseID = ?";
-		List<Course> course = jdbcTemplate.query(sql, rowMapper, id);
-		if(course.size() == 0)
+		List<Course> course = jdbcTemplate.query(SELECT_SINGLE_COURSE_QUERY, rowMapper, id);
+		if(course.isEmpty())
 			return null;
 		return course.get(0);
 		
@@ -62,13 +58,11 @@ public class CourseRepositoryImpl implements CourseRepository {
 	
 	@Override
 	public void updateCourse(int id, Course course) {
-		sql = "update Courses set courseID=?, courseName=? where courseID=?";
-		jdbcTemplate.update(sql, course.getCourseID(), course.getCourseName(), id);
+		jdbcTemplate.update(UPDATE_COURSE_QUERY, course.getCourseID(), course.getCourseName(), id);
 	}
 	
 	@Override
 	public void deleteCourse(int id) {
-		sql = "delete from Courses where courseID=?";
-		jdbcTemplate.update(sql, id);
+		jdbcTemplate.update(DELETE_COURSE_QUERY, id);
 	}
 }

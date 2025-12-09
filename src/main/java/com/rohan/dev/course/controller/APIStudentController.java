@@ -1,35 +1,23 @@
 package com.rohan.dev.course.controller;
 
-import static java.time.LocalDateTime.now;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.rohan.dev.course.domain.APIResponse;
 import com.rohan.dev.course.dto.StudentDTO;
 import com.rohan.dev.course.exceptions.InvalidStudentException;
 import com.rohan.dev.course.exceptions.StudentNotFoundException;
 import com.rohan.dev.course.service.StudentService;
-
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
+import static java.time.LocalDateTime.now;
 
 @RestController
 @RequestMapping("/api")
@@ -89,7 +77,7 @@ public class APIStudentController {
 		return student;
 	}
 	
-	@DeleteMapping("/students/{id}")
+	@DeleteMapping("/students/remove/{id}")
 	public StudentDTO deleteStudent(@PathVariable int id) throws StudentNotFoundException {
 		try {
 			return studentService.removeStudent(id);
@@ -104,17 +92,38 @@ public class APIStudentController {
 	}
 	
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public void handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletResponse res) throws IOException {
-    	res.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+    public ResponseEntity<APIResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        return ResponseEntity.badRequest().body(
+                new APIResponse()
+                        .setTimeStamp(now().toString())
+                        .setStatus(HttpStatus.BAD_REQUEST)
+                        .setStatusCode(HttpStatus.BAD_REQUEST.value())
+                        .setDevMsg("Binding error! Check your request body.")
+                        .setError(ex.getBindingResult().getAllErrors().get(0).getDefaultMessage())
+        );
     }
 	
 	@ExceptionHandler(InvalidStudentException.class)
-	public void handleInvalidCourse(InvalidStudentException ex, HttpServletResponse res) throws IOException {
-		res.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+	public ResponseEntity<APIResponse> handleInvalidStudent(InvalidStudentException ex) {
+        return ResponseEntity.badRequest().body(
+                new APIResponse()
+                        .setTimeStamp(now().toString())
+                        .setStatus(HttpStatus.BAD_REQUEST)
+                        .setStatusCode(HttpStatus.BAD_REQUEST.value())
+                        .setMessage("Invalid Student ID!")
+                        .setError(ex.getMessage())
+        );
 	}
 	
 	@ExceptionHandler(StudentNotFoundException.class)
-	public void handleInvalidCourse(StudentNotFoundException ex, HttpServletResponse res) throws IOException {
-		res.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
+	public ResponseEntity<APIResponse> handleStudentNotFound(StudentNotFoundException ex) {
+        return ResponseEntity.badRequest().body(
+                new APIResponse()
+                        .setTimeStamp(now().toString())
+                        .setStatus(HttpStatus.NOT_FOUND)
+                        .setStatusCode(HttpStatus.NOT_FOUND.value())
+                        .setMessage("Student not found!")
+                        .setError(ex.getMessage())
+        );
 	}
 }

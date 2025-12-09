@@ -145,8 +145,7 @@ public class UserRepositoryImpl implements UserRepository<User>, UserDetailsServ
 	@Override
 	public User getUserByEmail(String email) {
 		try {
-			User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, Map.of("email", email), rowMapper);
-			return user;
+            return jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, Map.of("email", email), rowMapper);
 		}
 		catch(EmptyResultDataAccessException e) {
             logs.warning("User not found with email: "+email);
